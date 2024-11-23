@@ -23,15 +23,15 @@ def load_users():
     if os.path.exists('users.csv'):
         return pd.read_csv('users.csv')
     else:
-        return pd.DataFrame(columns=['Email', 'Password'])
+        return pd.DataFrame(columns=['Email', 'Password', 'Phone', 'Birthday'])
 
 # Fungsi untuk menyimpan pengguna ke file CSV
-def save_user(email, password):
+def save_user(email, password, phone, birthday):
     users = load_users()
     if users.empty:
-        users = pd.DataFrame(columns=['Email', 'Password'])
+        users = pd.DataFrame(columns=['Email', 'Password', 'Phone', 'Birthday'])
 
-    new_user = pd.DataFrame({'Email': [email], 'Password': [password]})
+    new_user = pd.DataFrame({'Email': [email], 'Password': [password], 'Phone': [phone], 'Birthday': [birthday]})
     users = pd.concat([users, new_user], ignore_index=True)
 
     users.to_csv('users.csv', index=False, mode='w', header=True)
@@ -61,21 +61,29 @@ def registration_page(main):
     tk.Label(reg_frame, text="Email:", font=("Arial", 14)).pack(pady=10)
     tk.Label(reg_frame, text="Password:", font=("Arial", 14)).pack(pady=10)
     tk.Label(reg_frame, text="Confirm Password:", font=("Arial", 14)).pack(pady=10)
+    tk.Label(reg_frame, text="Phone Number:", font=("Arial", 14)).pack(pady=10)
+    tk.Label(reg_frame, text="Birthday (yyyy-mm-dd):", font=("Arial", 14)).pack(pady=10)
 
     email_entry = tk.Entry(reg_frame, font=("Arial", 14))
     password_entry = tk.Entry(reg_frame, font=("Arial", 14), show="*")
     confirm_password_entry = tk.Entry(reg_frame, font=("Arial", 14), show="*")
+    phone_entry = tk.Entry(reg_frame, font=("Arial", 14))
+    birthday_entry = tk.Entry(reg_frame, font=("Arial", 14))
 
     email_entry.pack(pady=10)
     password_entry.pack(pady=10)
     confirm_password_entry.pack(pady=10)
+    phone_entry.pack(pady=10)
+    birthday_entry.pack(pady=10)
 
     def on_register():
         email = email_entry.get()
         password = password_entry.get()
         confirm_password = confirm_password_entry.get()
+        phone = phone_entry.get()
+        birthday = birthday_entry.get()
 
-        if email == "" or password == "" or confirm_password == "":
+        if email == "" or password == "" or confirm_password == "" or phone == "" or birthday == "":
             messagebox.showerror("Error", "Harap lengkapi semua kolom")
         elif password != confirm_password:
             messagebox.showerror("Error", "Password dan konfirmasi password tidak cocok")
@@ -84,7 +92,7 @@ def registration_page(main):
             if email in users['Email'].values:
                 messagebox.showerror("Error", "Email sudah terdaftar")
             else:
-                save_user(email, password)
+                save_user(email, password, phone, birthday)
                 messagebox.showinfo("Success", "Registrasi berhasil, silakan login")
                 login_page(main)
 
