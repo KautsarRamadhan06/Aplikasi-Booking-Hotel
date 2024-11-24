@@ -4,12 +4,14 @@ from tkcalendar import Calendar
 import pandas as pd
 import os
 
+SESSION_FILE = 'session.txt'
+
 # Fungsi untuk memuat hotel dari file CSV
 def load_hotels():
     try:
         if os.path.exists('daftar_hotel_solo.csv'):
-            hotels = pd.read_csv('daftar_hotel_solo.csv', on_bad_lines='skip')  # Abaikan baris yang rusak
-            hotels.columns = hotels.columns.str.strip()  # Menghapus spasi di nama kolom
+            hotels = pd.read_csv('daftar_hotel_solo.csv', on_bad_lines='skip')
+            hotels.columns = hotels.columns.str.strip()
             return hotels
         else:
             messagebox.showerror("Error", "File CSV 'daftar_hotel_solo.csv' tidak ditemukan.")
@@ -41,20 +43,43 @@ def load_bookings():
     if os.path.exists('bookings.csv'):
         return pd.read_csv('bookings.csv')
     else:
-        return pd.DataFrame(columns=['Email', 'Hotel', 'Date'])
+        return pd.DataFrame(columns=['Email', 'Hotel', 'Date', 'Room'])
 
 # Fungsi untuk menyimpan riwayat pemesanan
-def save_booking(email, hotel_name, date):
+def save_booking(email, hotel_name, date, room_type):
     bookings = load_bookings()
-    new_booking = pd.DataFrame({'Email': [email], 'Hotel': [hotel_name], 'Date': [date]})
+    new_booking = pd.DataFrame({'Email': [email], 'Hotel': [hotel_name], 'Date': [date], 'Room': [room_type]})
     bookings = pd.concat([bookings, new_booking], ignore_index=True)
     bookings.to_csv('bookings.csv', index=False, mode='w', header=True)
 
+# Fungsi untuk menyimpan sesi pengguna
+def save_session(email):
+    with open(SESSION_FILE, 'w') as f:
+        f.write(email)
+
+# Fungsi untuk memuat sesi pengguna
+def load_session():
+    if os.path.exists(SESSION_FILE):
+        with open(SESSION_FILE, 'r') as f:
+            return f.read().strip()
+    return None
+
+# Fungsi untuk menghapus sesi pengguna
+def clear_session():
+    if os.path.exists(SESSION_FILE):
+        os.remove(SESSION_FILE)
+
+# Fungsi logout
+def logout(main):
+    if messagebox.askyesno("Logout", "Apakah Anda yakin ingin logout?"):
+        main.email = None
+        clear_session()
+        login_page(main)
+
 # Halaman Registrasi
 def registration_page(main):
-    for widget in main.winfo_children():
-        widget.destroy()
-
+    clear_frame(main)
+    
     reg_frame = tk.Frame(main)
     reg_frame.pack(pady=50)
 
@@ -99,11 +124,22 @@ def registration_page(main):
     reg_button = tk.Button(reg_frame, text="Register", font=("Arial", 14), command=on_register)
     reg_button.pack(pady=20)
 
+# Fungsi login dengan sesi
+def login_with_session(main):
+    session_email = load_session()
+    if session_email:
+        users = load_users()
+        user = users[users['Email'] == session_email]
+        if not user.empty:
+            main.email = session_email
+            hotel_selection_page(main)
+            return
+    login_page(main)
+
 # Halaman Login
 def login_page(main):
-    for widget in main.winfo_children():
-        widget.destroy()
-
+    clear_frame(main)
+    
     login_frame = tk.Frame(main)
     login_frame.pack(pady=50)
 
@@ -131,6 +167,7 @@ def login_page(main):
                 messagebox.showerror("Error", "Password salah")
             else:
                 main.email = email
+                save_session(email)
                 hotel_selection_page(main)
 
     login_button = tk.Button(login_frame, text="Login", font=("Arial", 14), command=on_login)
@@ -141,9 +178,8 @@ def login_page(main):
 
 # Halaman Pemilihan Hotel
 def hotel_selection_page(main):
-    for widget in main.winfo_children():
-        widget.destroy()
-
+    clear_frame(main)
+    
     hotels = load_hotels()
     if hotels is None or hotels.empty:
         messagebox.showerror("Error", "Tidak ada hotel yang tersedia.")
@@ -165,14 +201,21 @@ def hotel_selection_page(main):
         )
         hotel_button.pack(pady=5)
 
+    logout_button = tk.Button(hotel_frame, text="Logout", font=("Arial", 14), bg="red", fg="white", command=lambda: logout(main))
+    logout_button.pack(pady=20)
+
+# Halaman Pemesanan
 def book_hotel(hotels, index, main):
+    clear_frame(main)
+    
     hotel_name = hotels.iloc[index]['Nama Hotel']
     address = hotels.iloc[index]['Alamat']
     rating = hotels.iloc[index]['Rating']
     phone = hotels.iloc[index]['Nomor Telepon']
 
-    # Calendar for selecting booking date
     booking_date = tk.StringVar()
+    room_type = tk.StringVar()
+
     def select_date():
         date_window = tk.Toplevel(main)
         date_window.title("Select Booking Date")
@@ -187,35 +230,39 @@ def book_hotel(hotels, index, main):
         confirm_button.pack(pady=10)
 
     select_date_button = tk.Button(main, text="Select Booking Date", command=select_date)
-    select_date_button.pack(pady=10)
+    select_date_button.pack(pady=20)
 
-    # Simulate Payment (just a mock)
-    def make_payment():
-        if not booking_date.get():
-            messagebox.showerror("Error", "Please select a booking date")
+    tk.Label(main, text="Room Type:", font=("Arial", 14)).pack(pady=10)
+    room_type.set("Single")
+    tk.Radiobutton(main, text="Single", variable=room_type, value="Single", font=("Arial", 12)).pack()
+    tk.Radiobutton(main, text="Double", variable=room_type, value="Double", font=("Arial", 12)).pack()
+
+    def on_book():
+        if booking_date.get() == "":
+            messagebox.showerror("Error", "Harap pilih tanggal pemesanan")
         else:
-            messagebox.showinfo("Payment", "Payment successful!")
-            save_booking(main.email, hotel_name, booking_date.get())
-            messagebox.showinfo(
-                "Hotel Dipesan",
-                f"Anda berhasil memesan: {hotel_name}\nAlamat: {address}\nRating: {rating}\nNomor Telepon: {phone}\nTgl Booking: {booking_date.get()}"
-            )
-            login_page(main)
+            save_booking(main.email, hotel_name, booking_date.get(), room_type.get())
+            messagebox.showinfo("Success", f"Pemesanan untuk {hotel_name} berhasil!")
+            hotel_selection_page(main)
 
-    payment_button = tk.Button(main, text="Pay Now", command=make_payment)
-    payment_button.pack(pady=10)
+    book_button = tk.Button(main, text="Book Now", font=("Arial", 14), command=on_book)
+    book_button.pack(pady=20)
 
-# Menjalankan aplikasi
-def main_app():
-    root = tk.Tk()
-    root.title("Hotel Booking System")
-    root.geometry("600x400")
+# Fungsi untuk membersihkan frame
+def clear_frame(main):
+    for widget in main.winfo_children():
+        widget.destroy()
 
-    main = tk.Frame(root)
-    main.pack(fill="both", expand=True)
+# Program utama
+def main():
+    window = tk.Tk()
+    window.title("Hotel Booking System")
+    window.geometry("600x600")
+    window.email = None
 
-    login_page(main)
-    root.mainloop()
+    login_with_session(window)
+
+    window.mainloop()
 
 if __name__ == "__main__":
-    main_app()
+    main()
