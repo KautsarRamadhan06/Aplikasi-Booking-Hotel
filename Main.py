@@ -80,26 +80,45 @@ def logout(main):
 def registration_page(main):
     clear_frame(main)
     
+   
+    # Main registration frame
     reg_frame = tk.Frame(main)
     reg_frame.pack(pady=50)
 
-    tk.Label(reg_frame, text="Email:", font=("Arial", 14)).pack(pady=10)
-    tk.Label(reg_frame, text="Password:", font=("Arial", 14)).pack(pady=10)
-    tk.Label(reg_frame, text="Confirm Password:", font=("Arial", 14)).pack(pady=10)
-    tk.Label(reg_frame, text="Phone Number:", font=("Arial", 14)).pack(pady=10)
-    tk.Label(reg_frame, text="Birthday (yyyy-mm-dd):", font=("Arial", 14)).pack(pady=10)
+    # Email field with label
+    email_frame = tk.Frame(reg_frame)
+    email_frame.pack(pady=10, anchor="w")
+    tk.Label(email_frame, text="Email:", font=("Arial", 14)).pack(anchor="w")
+    email_entry = tk.Entry(email_frame, font=("Arial", 14))
+    email_entry.pack(anchor="w")
 
-    email_entry = tk.Entry(reg_frame, font=("Arial", 14))
-    password_entry = tk.Entry(reg_frame, font=("Arial", 14), show="*")
-    confirm_password_entry = tk.Entry(reg_frame, font=("Arial", 14), show="*")
-    phone_entry = tk.Entry(reg_frame, font=("Arial", 14))
-    birthday_entry = tk.Entry(reg_frame, font=("Arial", 14))
+    # Password field with label
+    password_frame = tk.Frame(reg_frame)
+    password_frame.pack(pady=10, anchor="w")
+    tk.Label(password_frame, text="Password:", font=("Arial", 14)).pack(anchor="w")
+    password_entry = tk.Entry(password_frame, font=("Arial", 14), show="*")
+    password_entry.pack(anchor="w")
 
-    email_entry.pack(pady=10)
-    password_entry.pack(pady=10)
-    confirm_password_entry.pack(pady=10)
-    phone_entry.pack(pady=10)
-    birthday_entry.pack(pady=10)
+    # Confirm Password field with label
+    confirm_password_frame = tk.Frame(reg_frame)
+    confirm_password_frame.pack(pady=10, anchor="w")
+    tk.Label(confirm_password_frame, text="Confirm Password:", font=("Arial", 14)).pack(anchor="w")
+    confirm_password_entry = tk.Entry(confirm_password_frame, font=("Arial", 14), show="*")
+    confirm_password_entry.pack(anchor="w")
+
+    # Phone Number field with label
+    phone_frame = tk.Frame(reg_frame)
+    phone_frame.pack(pady=10, anchor="w")
+    tk.Label(phone_frame, text="Phone Number:", font=("Arial", 14)).pack(anchor="w")
+    phone_entry = tk.Entry(phone_frame, font=("Arial", 14))
+    phone_entry.pack(anchor="w")
+
+    # Birthday field with label
+    birthday_frame = tk.Frame(reg_frame)
+    birthday_frame.pack(pady=10, anchor="w")
+    tk.Label(birthday_frame, text="Birthday (yyyy-mm-dd):", font=("Arial", 14)).pack(anchor="w")
+    birthday_entry = tk.Entry(birthday_frame, font=("Arial", 14))
+    birthday_entry.pack(anchor="w")
 
     def on_register():
         email = email_entry.get()
@@ -142,15 +161,20 @@ def login_page(main):
     
     login_frame = tk.Frame(main)
     login_frame.pack(pady=50)
+    
+    # Email field with label
+    email_frame = tk.Frame(login_frame)
+    email_frame.pack(pady=10, anchor="w")
+    tk.Label(email_frame, text="Email:", font=("Arial", 14)).pack(anchor="w")
+    email_entry = tk.Entry(email_frame, font=("Arial", 14))
+    email_entry.pack(anchor="w")
 
-    tk.Label(login_frame, text="Email:", font=("Arial", 14)).pack(pady=10)
-    tk.Label(login_frame, text="Password:", font=("Arial", 14)).pack(pady=10)
-
-    email_entry = tk.Entry(login_frame, font=("Arial", 14))
-    password_entry = tk.Entry(login_frame, font=("Arial", 14), show="*")
-
-    email_entry.pack(pady=10)
-    password_entry.pack(pady=10)
+    # Password field with label
+    password_frame = tk.Frame(login_frame)
+    password_frame.pack(pady=10, anchor="w")
+    tk.Label(password_frame, text="Password:", font=("Arial", 14)).pack(anchor="w")
+    password_entry = tk.Entry(password_frame, font=("Arial", 14), show="*")
+    password_entry.pack(anchor="w")
 
     def on_login():
         email = email_entry.get()
@@ -184,19 +208,42 @@ def hotel_selection_page(main):
     if hotels is None or hotels.empty:
         messagebox.showerror("Error", "Tidak ada hotel yang tersedia.")
         return
+    
+    # Main frame with canvas and scrollbar
+    main_frame = tk.Frame(main)
+    main_frame.pack(fill=tk.BOTH, expand=True)
 
-    hotel_frame = tk.Frame(main)
-    hotel_frame.pack(pady=50)
+    canvas = tk.Canvas(main_frame)
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
+    scrollbar = tk.Scrollbar(main_frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    # Mouse scroll functionality
+    def on_mouse_wheel(event):
+        canvas.yview_scroll(-1 * (event.delta // 120), "units")  # Windows and MacOS
+    canvas.bind_all("<MouseWheel>", on_mouse_wheel)
+
+    # For Linux/Unix systems
+    canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
+    canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
+
+    # Frame inside canvas
+    hotel_frame = tk.Frame(canvas)
+    canvas.create_window((500, 0), window=hotel_frame, anchor="n")
     tk.Label(hotel_frame, text="Pilih Hotel", font=("Arial", 20)).pack(pady=10)
-
+    # Sub-frame to center content
+    center_frame = tk.Frame(hotel_frame)
+    center_frame.pack(pady=10)
+    # Hotel buttons
     for index, row in hotels.iterrows():
         hotel_info = f"{row['Nama Hotel']} - Rating: {row['Rating']} - {row['Alamat']}"
         hotel_button = tk.Button(
-            hotel_frame,
+            center_frame,
             text=hotel_info,
             font=("Arial", 12),
-            width=50,
             command=lambda i=index: book_hotel(hotels, i, main)
         )
         hotel_button.pack(pady=5)
@@ -212,6 +259,8 @@ def book_hotel(hotels, index, main):
     address = hotels.iloc[index]['Alamat']
     rating = hotels.iloc[index]['Rating']
     phone = hotels.iloc[index]['Nomor Telepon']
+    priceSingle = hotels.iloc[index]['Single']
+    priceDouble = hotels.iloc[index]['Double']
 
     booking_date = tk.StringVar()
     room_type = tk.StringVar()
@@ -234,8 +283,8 @@ def book_hotel(hotels, index, main):
 
     tk.Label(main, text="Room Type:", font=("Arial", 14)).pack(pady=10)
     room_type.set("Single")
-    tk.Radiobutton(main, text="Single", variable=room_type, value="Single", font=("Arial", 12)).pack()
-    tk.Radiobutton(main, text="Double", variable=room_type, value="Double", font=("Arial", 12)).pack()
+    tk.Radiobutton(main, text=f"Single price : {priceSingle}", variable=room_type, value="Single", font=("Arial", 12)).pack()
+    tk.Radiobutton(main, text=f"Double price : {priceDouble}", variable=room_type, value="Double", font=("Arial", 12)).pack()
 
     def on_book():
         if booking_date.get() == "":
@@ -257,7 +306,7 @@ def clear_frame(main):
 def main():
     window = tk.Tk()
     window.title("Hotel Booking System")
-    window.geometry("600x600")
+    window.geometry("1000x600")
     window.email = None
 
     login_with_session(window)
