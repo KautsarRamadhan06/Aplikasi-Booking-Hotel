@@ -31,6 +31,8 @@ FITUR APLIKASI:
 ![flowchart finish drawio](https://github.com/user-attachments/assets/8c28e8ce-495a-496f-a1d3-11aab1d0272b)
 
 SITEMAP
+
+
 [Halaman Login] -----> [Halaman Registrasi]  
        |  
        v  
