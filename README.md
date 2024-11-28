@@ -29,3 +29,15 @@ FITUR APLIKASI:
    FLOWCHART
 
 ![flowchart finish drawio](https://github.com/user-attachments/assets/8c28e8ce-495a-496f-a1d3-11aab1d0272b)
+
+SITEMAP
+[Halaman Login] -----> [Halaman Registrasi]  
+       |  
+       v  
+[Manajemen Sesi] (Auto-login jika sesi ada)  
+       |  
+       v  
+[Halaman Pemilihan Hotel] ---> [Halaman Pemesanan]  
+       |                          |  
+       |------------------------- Logout (opsional)  
+
