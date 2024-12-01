@@ -3,6 +3,10 @@ from tkinter import messagebox
 from tkcalendar import Calendar
 import pandas as pd
 import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from datetime import datetime
 
 SESSION_FILE = 'session.txt'
 
@@ -265,9 +269,14 @@ def book_hotel(hotels, index, main):
     booking_date = tk.StringVar()
     room_type = tk.StringVar()
 
+    tk.Label(main, text=f"Hotel: {hotel_name}", font=("Arial", 20)).pack(pady=10)
+    tk.Label(main, text=f"Alamat: {address}", font=("Arial", 14)).pack(pady=5)
+    tk.Label(main, text=f"Rating: {rating}", font=("Arial", 14)).pack(pady=5)
+    tk.Label(main, text=f"Telepon: {phone}", font=("Arial", 14)).pack(pady=5)
+
     def select_date():
         date_window = tk.Toplevel(main)
-        date_window.title("Select Booking Date")
+        date_window.title("Pilih Tanggal")
         calendar = Calendar(date_window, selectmode='day', date_pattern='yyyy-mm-dd', showweeknumbers=False)
         calendar.pack(pady=20)
 
@@ -275,27 +284,95 @@ def book_hotel(hotels, index, main):
             booking_date.set(calendar.get_date())
             date_window.destroy()
 
-        confirm_button = tk.Button(date_window, text="Confirm Date", command=confirm_date)
+        confirm_button = tk.Button(date_window, text="Pilih", command=confirm_date)
         confirm_button.pack(pady=10)
 
-    select_date_button = tk.Button(main, text="Select Booking Date", command=select_date)
+    select_date_button = tk.Button(main, text="Pilih Tanggal Booking", command=select_date)
     select_date_button.pack(pady=20)
 
-    tk.Label(main, text="Room Type:", font=("Arial", 14)).pack(pady=10)
+    tk.Label(main, text="Tipe Kamar:", font=("Arial", 14)).pack(pady=10)
     room_type.set("Single")
-    tk.Radiobutton(main, text=f"Single price : {priceSingle}", variable=room_type, value="Single", font=("Arial", 12)).pack()
-    tk.Radiobutton(main, text=f"Double price : {priceDouble}", variable=room_type, value="Double", font=("Arial", 12)).pack()
+    tk.Radiobutton(main, text=f"Single (Rp {priceSingle})", variable=room_type, value="Single", font=("Arial", 12)).pack()
+    tk.Radiobutton(main, text=f"Double (Rp {priceDouble})", variable=room_type, value="Double", font=("Arial", 12)).pack()
 
     def on_book():
-        if booking_date.get() == "":
-            messagebox.showerror("Error", "Harap pilih tanggal pemesanan")
-        else:
-            save_booking(main.email, hotel_name, booking_date.get(), room_type.get())
-            messagebox.showinfo("Success", f"Pemesanan untuk {hotel_name} berhasil!")
-            hotel_selection_page(main)
+        selected_date = booking_date.get()
+        if not selected_date:
+            messagebox.showerror("Error", "Harap pilih tanggal booking!")
+            return
 
-    book_button = tk.Button(main, text="Book Now", font=("Arial", 14), command=on_book)
+        # Validasi tanggal
+        try:
+            datetime.strptime(selected_date, '%Y-%m-%d')
+        except ValueError:
+            messagebox.showerror("Error", "Format tanggal salah!")
+            return
+
+        # Simpan data booking
+        save_booking(main.email, hotel_name, selected_date, room_type.get())
+        
+        # Kirim email konfirmasi
+        price = priceSingle if room_type.get() == "Single" else priceDouble
+        email_sent = send_booking_confirmation(
+            main.email, hotel_name, selected_date, room_type.get(), price
+        )
+
+        if email_sent:
+            messagebox.showinfo("Sukses", f"Pemesanan berhasil! Email konfirmasi dikirim ke {main.email}.")
+        else:
+            messagebox.showerror("Error", "Gagal mengirim email konfirmasi.")
+        hotel_selection_page(main)
+
+    book_button = tk.Button(main, text="Booking", font=("Arial", 14), bg="green", fg="white", command=on_book)
     book_button.pack(pady=20)
+
+    back_button = tk.Button(main, text="Kembali", font=("Arial", 14), command=lambda: hotel_selection_page(main))
+    back_button.pack(pady=10)
+
+        
+def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, price):
+    try:
+        # Konfigurasi email pengirim (gunakan email dan password aplikasi)
+        sender_email = "kautsarbudianto06@gmail.com"
+        sender_password = "bfbq sipb wwar otvc"  # Gunakan app password untuk keamanan
+
+        # Buat objek pesan
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['To'] = to_email
+        message['Subject'] = f"Konfirmasi Booking Hotel {hotel_name}"
+
+        # Buat isi email
+        body = f"""
+        Konfirmasi Booking Hotel
+
+        Terima kasih telah melakukan booking:
+
+        Detail Booking:
+        - Hotel: {hotel_name}
+        - Tanggal: {booking_date}
+        - Tipe Kamar: {room_type}
+        
+        Silakan lakukan pembayaran sesuai dengan detail booking.
+
+        Terima kasih!
+        """
+
+        # Tambahkan body ke email
+        message.attach(MIMEText(body, 'plain'))
+
+        # Buat koneksi SMTP
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()  # Aktifkan keamanan TLS
+            server.login(sender_email, sender_password)
+            
+            # Kirim email
+            server.send_message(message)
+        
+        return True
+    except Exception as e:
+        print(f"Gagal mengirim email: {e}")
+        return False
 
 # Fungsi untuk membersihkan frame
 def clear_frame(main):
