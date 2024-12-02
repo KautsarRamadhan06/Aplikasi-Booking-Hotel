@@ -7,6 +7,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
+from PIL import Image, ImageTk
 
 SESSION_FILE = 'session.txt'
 
@@ -50,9 +51,9 @@ def load_bookings():
         return pd.DataFrame(columns=['Email', 'Hotel', 'Date', 'Room'])
 
 # Fungsi untuk menyimpan riwayat pemesanan
-def save_booking(email, hotel_name, date, room_type):
+def save_booking(email, hotel_name, date, room_type, payment_method):
     bookings = load_bookings()
-    new_booking = pd.DataFrame({'Email': [email], 'Hotel': [hotel_name], 'Date': [date], 'Room': [room_type]})
+    new_booking = pd.DataFrame({'Email': [email], 'Hotel': [hotel_name], 'Date': [date], 'Room': [room_type],'Payment': [payment_method]})
     bookings = pd.concat([bookings, new_booking], ignore_index=True)
     bookings.to_csv('bookings.csv', index=False, mode='w', header=True)
 
@@ -268,6 +269,7 @@ def book_hotel(hotels, index, main):
 
     booking_date = tk.StringVar()
     room_type = tk.StringVar()
+    payment_method = tk.StringVar()
 
     tk.Label(main, text=f"Hotel: {hotel_name}", font=("Arial", 20)).pack(pady=10)
     tk.Label(main, text=f"Alamat: {address}", font=("Arial", 14)).pack(pady=5)
@@ -294,9 +296,16 @@ def book_hotel(hotels, index, main):
     room_type.set("Single")
     tk.Radiobutton(main, text=f"Single (Rp {priceSingle})", variable=room_type, value="Single", font=("Arial", 12)).pack()
     tk.Radiobutton(main, text=f"Double (Rp {priceDouble})", variable=room_type, value="Double", font=("Arial", 12)).pack()
+    
+    tk.Label(main, text="Pilih Metode Pembayaran:", font=("Arial", 14)).pack(pady=10)
+    payment_method.set("Transfer Bank")
+    tk.Radiobutton(main, text="Transfer Bank", variable=payment_method, value="Transfer Bank", font=("Arial", 12)).pack()
+    tk.Radiobutton(main, text="Kartu Kredit", variable=payment_method, value="Kartu Kredit", font=("Arial", 12)).pack()
+    tk.Radiobutton(main, text="Bayar di Tempat", variable=payment_method, value="Bayar di Tempat", font=("Arial", 12)).pack()
 
     def on_book():
         selected_date = booking_date.get()
+        selected_payment = payment_method.get()
         if not selected_date:
             messagebox.showerror("Error", "Harap pilih tanggal booking!")
             return
@@ -307,14 +316,22 @@ def book_hotel(hotels, index, main):
         except ValueError:
             messagebox.showerror("Error", "Format tanggal salah!")
             return
+        
+        # Logika tambahan untuk metode pembayaran
+        if selected_payment == "Transfer Bank":
+            messagebox.showinfo("Instruksi", "Silakan transfer ke rekening berikut:\n\nBank: BNI\nNo. Rekening: 1814241787\nAtas Nama: Hotel Booking")
+        elif selected_payment == "Kartu Kredit":
+            messagebox.showinfo("Instruksi", "Pembayaran melalui kartu kredit akan diproses secara otomatis.")
+        else:
+            messagebox.showinfo("Instruksi", "Silakan selesaikan pembayaran di lokasi.")
 
         # Simpan data booking
-        save_booking(main.email, hotel_name, selected_date, room_type.get())
+        save_booking(main.email, hotel_name, selected_date, room_type.get(),selected_payment)
         
         # Kirim email konfirmasi
         price = priceSingle if room_type.get() == "Single" else priceDouble
         email_sent = send_booking_confirmation(
-            main.email, hotel_name, selected_date, room_type.get(), price
+            main.email, hotel_name, selected_date, room_type.get(), price, selected_payment
         )
 
         if email_sent:
@@ -330,7 +347,7 @@ def book_hotel(hotels, index, main):
     back_button.pack(pady=10)
 
         
-def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, price):
+def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, price, payment_method):
     try:
         # Konfigurasi email pengirim (gunakan email dan password aplikasi)
         sender_email = "kautsarbudianto06@gmail.com"
@@ -352,8 +369,14 @@ def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, pri
         - Hotel: {hotel_name}
         - Tanggal: {booking_date}
         - Tipe Kamar: {room_type}
+        - Metode Pembayaran: {payment_method}
         
-        Silakan lakukan pembayaran sesuai dengan detail booking.
+        Jika Anda memilih Transfer Bank:
+        Silakan transfer ke rekening berikut:
+        
+        - Bank: BNI
+        - No. Rekening: 1814241787
+        - Atas Nama: Hotel Booking
 
         Terima kasih!
         """
