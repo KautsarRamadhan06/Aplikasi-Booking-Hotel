@@ -133,37 +133,22 @@ def hotel_selection_page(main):
     from logout import logout
     clear_frame(main)
 
-    # Load background image
-    try:
-        bg_image = Image.open("pilih hotel.png")
-        bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)
-        bg_photo = ImageTk.PhotoImage(bg_image)
-    except FileNotFoundError:
-        messagebox.showerror("Error", "Background image 'pilih hotel.png' not found.")
-        return
 
-    # Background label
-    background_label = tk.Label(main, image=bg_photo)
-    background_label.image = bg_photo  # Simpan referensi agar tidak terhapus garbage collector
-    background_label.place(relx=0, rely=0, relwidth=1, relheight=1)
-
-    # Frame utama
-    main_frame = tk.Frame(main, bg="white", bd=5)
-    main_frame.place(relx=0.55, rely=0.5, anchor="center", relwidth=0.35, relheight=0.4)
+    # # Frame utama untuk konten
+    # main_frame = tk.Frame(main, bg="white", bd=5)
+    # main_frame.place(relx=0.55, rely=0.5, anchor="center", relwidth=0.35, relheight=0.4)
 
     # Canvas untuk daftar hotel
-    canvas = tk.Canvas(main_frame, bg="white")
+    canvas = tk.Canvas(main, bg="white")
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     # Scrollbar vertikal
-    scrollbar = tk.Scrollbar(main_frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar = tk.Scrollbar(main, orient=tk.VERTICAL, command=canvas.yview, bg="white")
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     # Konfigurasi canvas
     canvas.configure(yscrollcommand=scrollbar.set)
     canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    
-    
 
     # Frame di dalam canvas untuk konten hotel
     hotel_list_frame = tk.Frame(canvas, bg="white")
@@ -171,12 +156,13 @@ def hotel_selection_page(main):
 
     # Header
     tk.Label(hotel_list_frame, text="Pilih Hotel", font=("Arial", 20, "bold"), bg="white").pack(pady=10)
-    
+
+    # Load daftar hotel
     hotels = load_hotels()
     if hotels is None or hotels.empty:
         messagebox.showerror("Error", "Tidak ada hotel yang tersedia.")
         return
-    
+
     for index, row in hotels.iterrows():
         hotel_info = f"{row['Nama Hotel']} - Rating: {row['Rating']} - {row['Alamat']}"
         hotel_button = tk.Button(
@@ -188,8 +174,8 @@ def hotel_selection_page(main):
             fg="#333333"
         )
         hotel_button.pack(pady=5)
-    
-     # Tambahkan tombol Logout di bagian bawah
+
+    # Tambahkan tombol Logout di bagian bawah
     logout_button = tk.Button(
         hotel_list_frame,
         text="Logout",
@@ -199,9 +185,3 @@ def hotel_selection_page(main):
         command=lambda: logout(main)
     )
     logout_button.pack(pady=20)
-    
-# Fungsi untuk membersihkan frame
-def clear_frame(main):
-    for widget in main.winfo_children():
-        widget.destroy()
-

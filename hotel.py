@@ -49,9 +49,10 @@ def hotel_selection_page(main):
     canvas = tk.Canvas(main_frame, bg="white")
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-    # Scrollbar vertikal
     scrollbar = tk.Scrollbar(main_frame, orient=tk.VERTICAL, command=canvas.yview)
+    scrollbar.config(bg="white", activebackground="white", troughcolor="white")  # Ganti warna
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
 
     # Konfigurasi canvas
     canvas.configure(yscrollcommand=scrollbar.set)
@@ -82,17 +83,10 @@ def hotel_selection_page(main):
             fg="#333333"
         )
         hotel_button.pack(pady=5)
-    
-     # Tambahkan tombol Logout di bagian bawah
-    logout_button = tk.Button(
-        hotel_list_frame,
-        text="Logout",
-        font=("Arial", 14),
-        bg="red",
-        fg="white",
-        command=lambda: logout(main)
-    )
-    logout_button.pack(pady=20)
+        
+# Tambahkan tombol Logout di bagian bawah
+    logout_button = tk.Button(main,text="Logout",font=("Arial", 14),bg="red",fg="white",command=lambda: logout(main))
+    logout_button.place(x=1000, y=750, width=100, height=40)
     
     
 from tkinter import messagebox
@@ -185,10 +179,29 @@ def book_hotel(hotels, index, main):
     tk.Radiobutton(main, text="Bayar di Tempat", variable=payment_method, value="Bayar di Tempat", font=("Arial", 12)).pack()
 
     def on_book():
+        
         selected_date = booking_date.get()
         selected_payment = payment_method.get()
         if not selected_date:
             messagebox.showerror("Error", "Harap pilih tanggal booking!")
+            return
+        # Muat gambar JPG untuk background
+        try:
+            # Pastikan file "py.png" ada
+            bg_image_path = "py.png"  # Sesuaikan path jika gambar ada di folder lain
+            if not os.path.exists(bg_image_path):
+                raise FileNotFoundError(f"File '{bg_image_path}' tidak ditemukan.")
+
+            bg_image = Image.open(bg_image_path)
+            bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)  # Resize sesuai jendela
+            bg_photo = ImageTk.PhotoImage(bg_image)
+
+            # Simpan referensi ke gambar di objek `main`
+            main.bg_photo = bg_photo  # Simpan referensi agar gambar tidak hilang
+            canvas.create_image(0, 0, image=main.bg_photo, anchor="nw")
+
+        except FileNotFoundError as e:
+            messagebox.showerror("Error", str(e))
             return
 
         # Validasi tanggal
@@ -227,6 +240,12 @@ def book_hotel(hotels, index, main):
 
     back_button = tk.Button(main, text="Kembali", font=("Arial", 14), command=lambda: hotel_selection_page(main))
     back_button.pack(pady=10)
+    
+    # Canvas untuk background
+    canvas = tk.Canvas(main, width=1000, height=600)
+    canvas.pack(fill=tk.BOTH, expand=True)
+
+
 
 def thank_you_page(main):
     from akhir import clear_frame
