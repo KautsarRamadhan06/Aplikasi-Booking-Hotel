@@ -4,9 +4,10 @@ import os
 from tkinter import messagebox
 from tkcalendar import Calendar
 from datetime import datetime
-from akhir import load_hotels, clear_frame
 from booking import save_booking, send_booking_confirmation
 from PIL import Image, ImageTk
+
+SESSION_FILE = 'session.txt'
 
 # Halaman Pemilihan Hotel
 def load_hotels():
@@ -23,6 +24,7 @@ def load_hotels():
         return None
     
 def hotel_selection_page(main):
+    from akhir import clear_frame
     clear_frame(main)
 
     # Load background image
@@ -54,6 +56,8 @@ def hotel_selection_page(main):
     # Konfigurasi canvas
     canvas.configure(yscrollcommand=scrollbar.set)
     canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    
+    
 
     # Frame di dalam canvas untuk konten hotel
     hotel_list_frame = tk.Frame(canvas, bg="white")
@@ -61,25 +65,80 @@ def hotel_selection_page(main):
 
     # Header
     tk.Label(hotel_list_frame, text="Pilih Hotel", font=("Arial", 20, "bold"), bg="white").pack(pady=10)
-
-    # Tambahkan daftar hotel
+    
     hotels = load_hotels()
     if hotels is None or hotels.empty:
         messagebox.showerror("Error", "Tidak ada hotel yang tersedia.")
         return
+    
     for index, row in hotels.iterrows():
-            hotel_info = f"{row['Nama Hotel']} - Rating: {row['Rating']} - {row['Alamat']}"
-            hotel_button = tk.Button(
-                hotel_list_frame,
-                text=hotel_info,
-                font=("Arial", 12),
-                command=lambda i=index: book_hotel(hotels,index, main),
-                bg="#f0f0f0",
-                fg="#333333"
-            )
-            hotel_button.pack(pady=5)
+        hotel_info = f"{row['Nama Hotel']} - Rating: {row['Rating']} - {row['Alamat']}"
+        hotel_button = tk.Button(
+            hotel_list_frame,
+            text=hotel_info,
+            font=("Arial", 12),
+            command=lambda i=index: book_hotel(hotels, i, main),
+            bg="#f0f0f0",
+            fg="#333333"
+        )
+        hotel_button.pack(pady=5)
+    
+     # Tambahkan tombol Logout di bagian bawah
+    logout_button = tk.Button(
+        hotel_list_frame,
+        text="Logout",
+        font=("Arial", 14),
+        bg="red",
+        fg="white",
+        command=lambda: logout(main)
+    )
+    logout_button.pack(pady=20)
+    
+    
+from tkinter import messagebox
+import pandas as pd
+
+# Fungsi logout
+def logout(main):
+    from login import login_page
+    if messagebox.askyesno("Logout", "Apakah Anda yakin ingin logout?"):
+        main.email = None
+        clear_session()  
+        login_page(main)# Fungsi untuk membersihkan sesi pengguna
+        # Navigasi ke halaman login
+
+# Fungsi untuk menampilkan daftar hotel
+def display_hotel_list(main, hotel_list_frame):
+    hotels = load_hotels()  # Fungsi untuk memuat data hotel
+    if hotels is None or hotels.empty:
+        messagebox.showerror("Error", "Tidak ada hotel yang tersedia.")
+        return
+    
+    # Hapus elemen yang ada di frame (jika perlu refresh)
+    for widget in hotel_list_frame.winfo_children():
+        widget.destroy()
+
+    # Tambahkan daftar hotel
+    for index, row in hotels.iterrows():
+        hotel_info = f"{row['Nama Hotel']} - Rating: {row['Rating']} - {row['Alamat']}"
+        hotel_button = tk.Button(
+            hotel_list_frame,
+            text=hotel_info,
+            font=("Arial", 12),
+            command=lambda i=index: book_hotel(hotels, i, main),  # Fungsi untuk memesan hotel
+            bg="#f0f0f0",
+            fg="#333333"
+        )
+        hotel_button.pack(pady=5)
+    
+# Fungsi untuk menghapus sesi pengguna
+def clear_session():
+    if os.path.exists(SESSION_FILE):
+        os.remove(SESSION_FILE)
+
 
 def book_hotel(hotels, index, main):
+    from akhir import clear_frame
     clear_frame(main)
     
     hotel_name = hotels.iloc[index]['Nama Hotel']
@@ -169,14 +228,16 @@ def book_hotel(hotels, index, main):
     back_button = tk.Button(main, text="Kembali", font=("Arial", 14), command=lambda: hotel_selection_page(main))
     back_button.pack(pady=10)
 
-    def thank_you_page(main):
-        clear_frame(main)  # Bersihkan frame sebelumnya
+def thank_you_page(main):
+    from akhir import clear_frame
+    from login import login_page
+    clear_frame(main)  # Bersihkan frame sebelumnya
 
-        # Buat label terima kasih
-        tk.Label(main, text="Terima Kasih!", font=("Arial", 24, "bold"), fg="green").pack(pady=20)
-        tk.Label(main, text="Pemesanan Anda telah berhasil.", font=("Arial", 16)).pack(pady=10)
-        tk.Label(main, text="Email konfirmasi telah dikirim.", font=("Arial", 14)).pack(pady=5)
+    # Buat label terima kasih
+    tk.Label(main, text="Terima Kasih!", font=("Arial", 24, "bold"), fg="green").pack(pady=20)
+    tk.Label(main, text="Pemesanan Anda telah berhasil.", font=("Arial", 16)).pack(pady=10)
+    tk.Label(main, text="Email konfirmasi telah dikirim.", font=("Arial", 14)).pack(pady=5)
         
-        # Tombol untuk kembali ke halaman awal
-        # tk.Button(main, text="Kembali ke Halaman Utama", font=("Arial", 14), command=lambda: login_page(main)).pack(pady=20)
+    # Tombol untuk kembali ke halaman awal
+    tk.Button(main, text="Kembali ke Halaman Utama", font=("Arial", 14), command=lambda: login_page(main)).pack(pady=20)   
 

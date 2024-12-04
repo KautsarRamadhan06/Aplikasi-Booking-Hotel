@@ -1,10 +1,23 @@
-Email,Hotel,Date,Room
-kautsar@gmail.com,The Royal Surakarta Heritage,2024-11-23,
-kautsar@gmail.com,The Royal Surakarta Heritage,2024-11-23,
-kautsar@gmail.com,Ibis Styles Solo,2024-11-23,
-kautsar@gmail.com,Swiss-Belinn Saripetojo,2024-11-29,
-kautsar@gmail.com,Swiss-Belinn Saripetojo,2024-11-28,
-kautsar@gmail.com,Swiss-Belinn Saripetojo,2024-11-29,
-danis@gmail.com,Alila Solo,2024-11-29,Single
-danis@gmail.com,Alila Solo,2024-12-01,Double
-danis@gmail.com,The Sunan Hotel Solo,2024-11-22,Double
+Email,Hotel,Date,Room,Payment
+kautsar@gmail.com,The Royal Surakarta Heritage,2024-11-23,,
+kautsar@gmail.com,The Royal Surakarta Heritage,2024-11-23,,
+kautsar@gmail.com,Ibis Styles Solo,2024-11-23,,
+kautsar@gmail.com,Swiss-Belinn Saripetojo,2024-11-29,,
+kautsar@gmail.com,Swiss-Belinn Saripetojo,2024-11-28,,
+kautsar@gmail.com,Swiss-Belinn Saripetojo,2024-11-29,,
+danis@gmail.com,Alila Solo,2024-11-29,Single,
+danis@gmail.com,Alila Solo,2024-12-01,Double,
+danis@gmail.com,The Sunan Hotel Solo,2024-11-22,Double,
+anjay@gmail.com,Hotel Diamond Surakarta,2024-11-28,Double,
+danis@gmail.com,The Royal Surakarta Heritage,2024-12-27,Single,Bayar di Tempat
+danis@gmail.com,Alila Solo,2024-12-20,Single,Transfer Bank
+loderobaroz@gmail.com,JW Naungan Co-Living & Villas,2024-12-20,Single,Transfer Bank
+loderobaroz@gmail.com,Aziza Hotel Solo by Horison,2024-12-06,Single,Transfer Bank
+loderobaroz@gmail.com,Sala View Hotel,2024-12-26,Single,Transfer Bank
+loderobaroz@gmail.com,Megaland Hotel Solo,2024-12-31,Single,Transfer Bank
+loderobaroz@gmail.com,Favehotel Solo Baru,2024-12-06,Single,Transfer Bank
+danis@gmail.com,Ibis Styles Solo,2024-12-06,Double,Transfer Bank
+danis@gmail.com,Hotel Neo Gading Solo,2024-12-13,Single,Transfer Bank
+loderobaroz@gmail.com,Ibis Styles Solo,2024-12-19,Single,Transfer Bank
+loderobaroz@gmail.com,Ibis Styles Solo,2024-12-06,Single,Transfer Bank
+danis@gmail.com,Ibis Styles Solo,2024-12-05,Single,Transfer Bank

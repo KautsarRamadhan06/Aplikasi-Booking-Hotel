@@ -4,6 +4,7 @@ from akhir import load_users, save_user, load_session, save_session, clear_sessi
 from hotel import hotel_selection_page
 from akhir import clear_frame
 
+
 # Fungsi login dengan sesi
 def login_with_session(main):
     session_email = load_session()
@@ -18,8 +19,24 @@ def login_with_session(main):
 
 # Halaman Login
 def login_page(main):
+    from PIL import Image,ImageTk
     clear_frame(main)
 
+    # Canvas untuk background
+    canvas = tk.Canvas(main, width=1000, height=600)
+    canvas.pack(fill=tk.BOTH, expand=True)
+
+    # Muat gambar JPG untuk background
+    try:
+        bg_image = Image.open("login awal.png")  # Pastikan file "background.jpg" ada di folder proyek
+        # Ganti bagian resize
+        bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)  # Ubah ukuran sesuai jendela
+        bg_photo = ImageTk.PhotoImage(bg_image)
+        canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+    except FileNotFoundError:
+        messagebox.showerror("Error", "File login awal.png tidak ditemukan.")
+        return
+    
     # Frame untuk elemen login
     login_frame = tk.Frame(main, bg="white", bd=5)
     login_frame.place(relx=0.7, rely=0.3, relwidth=0.2, relheight=0.4)  # Posisikan di tengah
@@ -64,6 +81,7 @@ def login_page(main):
     # Tombol Registrasi
     register_button = tk.Button(login_frame, text="Don't have an account? Register", font=("Arial", 12), bg="green", fg="white", command=lambda: registration_page(main))
     register_button.pack(pady=10)
+    
 
 # Halaman Registrasi
 def registration_page(main):
@@ -130,6 +148,9 @@ def registration_page(main):
 
     reg_button = tk.Button(reg_frame, text="Register", font=("Arial", 14), command=on_register)
     reg_button.pack(pady=20)
+    
+    back_button = tk.Button(main, text="Kembali", font=("Arial", 14), command=lambda: login_page(main))
+    back_button.pack(pady=10)
 
 # Fungsi logout
 def logout(main):
