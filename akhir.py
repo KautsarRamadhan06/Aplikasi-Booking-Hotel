@@ -130,7 +130,6 @@ def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, pri
         return False
 
 def hotel_selection_page(main):
-    from logout import logout
     clear_frame(main)
 
 
