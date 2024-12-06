@@ -174,13 +174,13 @@ def hotel_selection_page(main):
         )
         hotel_button.pack(pady=5)
 
-    # Tambahkan tombol Logout di bagian bawah
-    logout_button = tk.Button(
-        hotel_list_frame,
-        text="Logout",
-        font=("Arial", 14),
-        bg="red",
-        fg="white",
-        command=lambda: logout(main)
-    )
-    logout_button.pack(pady=20)
+    # # Tambahkan tombol Logout di bagian bawah
+    # logout_button = tk.Button(
+    #     hotel_list_frame,
+    #     text="Logout",
+    #     font=("Arial", 14),
+    #     bg="red",
+    #     fg="white",
+    #     command=lambda: logout(main)
+    # )
+    # logout_button.pack(pady=20)

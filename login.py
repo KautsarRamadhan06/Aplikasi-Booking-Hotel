@@ -95,3 +95,72 @@ def login_page(main):
         command=lambda: login_page(main)
     )
     register_button.pack(pady=10)
+    
+    
+def registration_page(main):
+    # Bersihkan frame utama
+    clear_frame(main)
+
+    # Main registration frame
+    reg_frame = tk.Frame(main)
+    reg_frame.pack(pady=50)
+
+    # Email field with label
+    email_frame = tk.Frame(reg_frame)
+    email_frame.pack(pady=10, anchor="w")
+    tk.Label(
+        email_frame, text="Email:", font=("Arial", 14)
+    ).pack(anchor="w")
+    email_entry = tk.Entry(email_frame, font=("Arial", 14))
+    email_entry.pack(anchor="w")
+
+    # Password field with label
+    password_frame = tk.Frame(reg_frame)
+    password_frame.pack(pady=10, anchor="w")
+    tk.Label(password_frame, text="Password:", font=("Arial", 14)).pack(anchor="w")
+    password_entry = tk.Entry(password_frame, font=("Arial", 14), show="*")
+    password_entry.pack(anchor="w")
+
+    # Confirm Password field with label
+    confirm_password_frame = tk.Frame(reg_frame)
+    confirm_password_frame.pack(pady=10, anchor="w")
+    tk.Label(confirm_password_frame, text="Confirm Password:", font=("Arial", 14)).pack(anchor="w")
+    confirm_password_entry = tk.Entry(confirm_password_frame, font=("Arial", 14), show="*")
+    confirm_password_entry.pack(anchor="w")
+
+    # Phone Number field with label
+    phone_frame = tk.Frame(reg_frame)
+    phone_frame.pack(pady=10, anchor="w")
+    tk.Label(phone_frame, text="Phone Number:", font=("Arial", 14)).pack(anchor="w")
+    phone_entry = tk.Entry(phone_frame, font=("Arial", 14))
+    phone_entry.pack(anchor="w")
+
+    # Birthday field with label
+    birthday_frame = tk.Frame(reg_frame)
+    birthday_frame.pack(pady=10, anchor="w")
+    tk.Label(birthday_frame, text="Birthday (yyyy-mm-dd):", font=("Arial", 14)).pack(anchor="w")
+    birthday_entry = tk.Entry(birthday_frame, font=("Arial", 14))
+    birthday_entry.pack(anchor="w")
+
+    def on_register():
+        email = email_entry.get()
+        password = password_entry.get()
+        confirm_password = confirm_password_entry.get()
+        phone = phone_entry.get()
+        birthday = birthday_entry.get()
+
+        if email == "" or password == "" or confirm_password == "" or phone == "" or birthday == "":
+            messagebox.showerror("Error", "Harap lengkapi semua kolom")
+        elif password != confirm_password:
+            messagebox.showerror("Error", "Password dan konfirmasi password tidak cocok")
+        else:
+            users = load_users()
+            if email in users['Email'].values:
+                messagebox.showerror("Error", "Email sudah terdaftar")
+            else:
+                save_session(email, password, phone, birthday)
+                messagebox.showinfo("Success", "Registrasi berhasil, silakan login")
+                login_page(main)
+
+    reg_button = tk.Button(reg_frame, text="Register", font=("Arial", 14), command=on_register)
+    reg_button.pack(pady=20)
