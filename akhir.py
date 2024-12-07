@@ -8,19 +8,6 @@ from tkinter import messagebox
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-# def load_hotels():
-#     try:
-#         if os.path.exists('daftar_hotel_solo.csv'):
-#             hotels = pd.read_csv('daftar_hotel_solo.csv', on_bad_lines='skip')
-#             hotels.columns = hotels.columns.str.strip()
-#             return hotels
-#         else:
-#             messagebox.showerror("Error", "File CSV 'daftar_hotel_solo.csv' tidak ditemukan.")
-#             return None
-#     except FileNotFoundError:
-#         messagebox.showerror("Error", "File CSV 'daftar_hotel_solo.csv' tidak ditemukan.")
-#         return None
-
 # Fungsi untuk clear frame
 def clear_frame(frame):
     for widget in frame.winfo_children():
