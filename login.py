@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import os
-from akhir import clear_frame,load_users,save_session,save_user
+import csv
+from akhir import clear_frame,load_users,save_session
 from hotel import hotel_selection_page
 
 def login_with_session(main, priceSingle, priceDouble, room_type, payment_method):
@@ -10,7 +11,7 @@ def login_with_session(main, priceSingle, priceDouble, room_type, payment_method
     print(f"Price Double: {priceDouble}")
     print(f"Room Type: {room_type}")
     print(f"Payment Method: {payment_method}")
-
+    
     from akhir import load_session
     session_email = load_session()
     if session_email:
@@ -39,7 +40,7 @@ def login_page(main):
 
     # Muat gambar JPG untuk background
     try:
-        bg_image_path = "login2.png"  # Sesuaikan path jika gambar ada di folder lain
+        bg_image_path = "login1.png"  # Sesuaikan path jika gambar ada di folder lain
         if not os.path.exists(bg_image_path):
             raise FileNotFoundError(f"File '{bg_image_path}' tidak ditemukan.")
 
@@ -98,16 +99,16 @@ def login_page(main):
 
     # Tombol Registrasi
     register_button = tk.Button(
-        login_frame,
-        text="Don't have an account? Register",
-        font=("Arial", 12),
-        bg="green",
-        fg="white",
+        login_frame, 
+        text="Don't have an account? Register", 
+        font=("Arial", 12), 
+        bg="green", 
+        fg="white", 
         command=lambda: registration_page(main)  # Assuming registration_page is defined elsewhere
     )
     register_button.pack(pady=10)
 
-
+    
 def clear_frame(frame):
     for widget in frame.winfo_children():
         widget.destroy()
@@ -162,16 +163,25 @@ def registration_page(main):
         elif password != confirm_password:
             messagebox.showerror("Error", "Password dan konfirmasi password tidak cocok")
         else:
-            save_user(email, password, phone, birthday)
+            # Simpan ke file CSV
+            file_exists = os.path.isfile('users.csv')
+            with open('users.csv', mode='a', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+            # Tulis header jika file baru
+                if not file_exists:
+                    writer.writerow(['Email', 'Password', 'Phone', 'Birthday'])
+                writer.writerow([email, password, phone, birthday])
+            
             messagebox.showinfo("Success", "Registrasi berhasil")
-            clear_frame(main)
-            # Kembali ke halaman login
-            login_page(main)
+            
+        clear_frame(main)
+        # Kembali ke halaman login
+        login_page(main)
 
 
     reg_button = tk.Button(reg_frame, text="Register", font=("Arial", 14), command=on_register)
     reg_button.pack(pady=20)
-
+    
 # root = tk.Tk()
 # root.geometry("400x500")
 # main = tk.Frame(root)
