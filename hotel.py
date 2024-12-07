@@ -155,10 +155,12 @@ def book_hotel(hotels, index, main, priceSingle, priceDouble, room_type, payment
     address = hotels.iloc[index]['Alamat']
     rating = hotels.iloc[index]['Rating']
     phone = hotels.iloc[index]['Nomor Telepon']
+    priceSingle = hotels.iloc[index]['Single']
+    priceDouble = hotels.iloc[index]['Double']
 
     # Frame utama untuk semua elemen
     main_frame = tk.Frame(main, bg="white")
-    main_frame.place(relx=0.5, rely=0.45, anchor="center", relwidth=0.5, relheight=0.83)
+    main_frame.place(relx=0.5, rely=0.45, anchor="center", relwidth=0.5, relheight=0.7)
 
     # Informasi hotel di dalam frame utama
     tk.Label(
@@ -218,10 +220,10 @@ def book_hotel(hotels, index, main, priceSingle, priceDouble, room_type, payment
         bg="red",
         fg="white",
         # Callback untuk kembali ke halaman pemilihan hotel
-        command=lambda: hotel_selection_page(main,priceSingle=0, priceDouble=0, room_type=None,payment_method=None)
+        command=lambda: hotel_selection_page(main,priceSingle, priceDouble, room_type,payment_method)
     ).pack(pady=10)
 
-def confirm_date(main, calendar, booking_date, main_frame, hotel_name, address, rating, phone, priceSingle, priceDouble, room_type, payment_method):
+def confirm_date(calendar, booking_date):
     from booking import show_booking_form
     # Ambil tanggal dari kalender dan simpan ke booking_date
     booking_date.set(calendar.get_date())

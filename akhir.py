@@ -186,11 +186,12 @@ def hotel_selection_page(main):
     # logout_button.pack(pady=20)
 def thank_you_page(main):
     from akhir import clear_frame
+    from login import login_page
     clear_frame(main)
 
     # Load background image for the thank you page
     try:
-        bg_image = Image.open("thankyou.png")  # Ganti dengan nama file gambar background
+        bg_image = Image.open("tq.png")  # Ganti dengan nama file gambar background
         bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)
         bg_photo = ImageTk.PhotoImage(bg_image)
     except FileNotFoundError:
@@ -226,6 +227,6 @@ def thank_you_page(main):
         font=("Arial", 16),
         bg="#4CAF50",
         fg="white",
-        command=lambda: hotel_selection_page(main)  # Kembali ke halaman pemilihan hotel
+        command=lambda: login_page(main)  # Kembali ke halaman pemilihan hotel
     )
     home_button.place(relx=0.5, rely=0.6, anchor="center", width=200, height=50)

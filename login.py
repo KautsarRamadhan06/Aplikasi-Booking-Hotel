@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import os
+import csv
 from akhir import clear_frame,load_users,save_session
 from hotel import hotel_selection_page
 
@@ -162,6 +163,15 @@ def registration_page(main):
         elif password != confirm_password:
             messagebox.showerror("Error", "Password dan konfirmasi password tidak cocok")
         else:
+            # Simpan ke file CSV
+            file_exists = os.path.isfile('users.csv')
+            with open('users.csv', mode='a', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+            # Tulis header jika file baru
+                if not file_exists:
+                    writer.writerow(['Email', 'Password', 'Phone', 'Birthday'])
+                writer.writerow([email, password, phone, birthday])
+            
             messagebox.showinfo("Success", "Registrasi berhasil")
             
         clear_frame(main)
