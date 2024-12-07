@@ -35,8 +35,13 @@ def load_users():
 
 def save_user(email, password, phone, birthday):
     users = load_users()
-    users = users.append({'Email': email, 'Password': password, 'Phone': phone, 'Birthday': birthday}, ignore_index=True)
-    users.to_csv('users.csv', index=False)
+    if users.empty:
+        users = pd.DataFrame(columns=['Email', 'Password', 'Phone', 'Birthday'])
+
+    new_user = pd.DataFrame({'Email': [email], 'Password': [password], 'Phone': [phone], 'Birthday': [birthday]})
+    users = pd.concat([users, new_user], ignore_index=True)
+
+    users.to_csv('users.csv', index=False, mode='w', header=True)
 
 # Fungsi untuk load session
 def load_session():
@@ -66,19 +71,19 @@ def load_hotels():
     except FileNotFoundError:
         messagebox.showerror("Error", "File CSV 'daftar_hotel_solo.csv' tidak ditemukan.")
         return None
-    
+
 def load_bookings():
     if os.path.exists('bookings.csv'):
         return pd.read_csv('bookings.csv')
     else:
         return pd.DataFrame(columns=['Email', 'Hotel', 'Date', 'Room'])
-    
+
 def save_booking(email, hotel_name, date, room_type, payment_method):
     bookings = load_bookings()
     new_booking = pd.DataFrame({'Email': [email], 'Hotel': [hotel_name], 'Date': [date], 'Room': [room_type],'Payment': [payment_method]})
     bookings = pd.concat([bookings, new_booking], ignore_index=True)
     bookings.to_csv('bookings.csv', index=False, mode='w', header=True)
-    
+
 def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, price, payment_method):
     try:
         # Konfigurasi email pengirim (gunakan email dan password aplikasi)
@@ -102,10 +107,10 @@ def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, pri
         - Tanggal: {booking_date}
         - Tipe Kamar: {room_type}
         - Metode Pembayaran: {payment_method}
-        
+
         Jika Anda memilih Transfer Bank:
         Silakan transfer ke rekening berikut:
-        
+
         - Bank: BNI
         - No. Rekening: 1814241787
         - Atas Nama: Hotel Booking
@@ -120,10 +125,10 @@ def send_booking_confirmation(to_email, hotel_name, booking_date, room_type, pri
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()  # Aktifkan keamanan TLS
             server.login(sender_email, sender_password)
-            
+
             # Kirim email
             server.send_message(message)
-        
+
         return True
     except Exception as e:
         print(f"Gagal mengirim email: {e}")
@@ -186,12 +191,11 @@ def hotel_selection_page(main):
     # logout_button.pack(pady=20)
 def thank_you_page(main):
     from akhir import clear_frame
-    from login import login_page
     clear_frame(main)
 
     # Load background image for the thank you page
     try:
-        bg_image = Image.open("tq.png")  # Ganti dengan nama file gambar background
+        bg_image = Image.open("thankyou.png")  # Ganti dengan nama file gambar background
         bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)
         bg_photo = ImageTk.PhotoImage(bg_image)
     except FileNotFoundError:
@@ -227,6 +231,6 @@ def thank_you_page(main):
         font=("Arial", 16),
         bg="#4CAF50",
         fg="white",
-        command=lambda: login_page(main)  # Kembali ke halaman pemilihan hotel
+        command=lambda: hotel_selection_page(main)  # Kembali ke halaman pemilihan hotel
     )
     home_button.place(relx=0.5, rely=0.6, anchor="center", width=200, height=50)
