@@ -184,3 +184,48 @@ def hotel_selection_page(main):
     #     command=lambda: logout(main)
     # )
     # logout_button.pack(pady=20)
+def thank_you_page(main):
+    from akhir import clear_frame
+    clear_frame(main)
+
+    # Load background image for the thank you page
+    try:
+        bg_image = Image.open("thankyou.png")  # Ganti dengan nama file gambar background
+        bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)
+        bg_photo = ImageTk.PhotoImage(bg_image)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "Background image 'thankyou.png' not found.")
+        return
+
+    # Add background to the main frame
+    background_label = tk.Label(main, image=bg_photo)
+    background_label.image = bg_photo  # Simpan referensi agar tidak terhapus garbage collector
+    background_label.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+    # Add a thank you message
+    tk.Label(
+        main,
+        text="Terima Kasih atas Pemesanan Anda!",
+        font=("Arial", 30, "bold"),
+        bg="#ffffff",
+        fg="#333333"
+    ).place(relx=0.5, rely=0.4, anchor="center")
+
+    tk.Label(
+        main,
+        text="Detail pemesanan telah dikirim ke email Anda.",
+        font=("Arial", 20),
+        bg="#ffffff",
+        fg="#666666"
+    ).place(relx=0.5, rely=0.5, anchor="center")
+
+    # Add a "Back to Home" button
+    home_button = tk.Button(
+        main,
+        text="Kembali ke Beranda",
+        font=("Arial", 16),
+        bg="#4CAF50",
+        fg="white",
+        command=lambda: hotel_selection_page(main)  # Kembali ke halaman pemilihan hotel
+    )
+    home_button.place(relx=0.5, rely=0.6, anchor="center", width=200, height=50)

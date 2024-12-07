@@ -23,7 +23,7 @@ def load_hotels():
         messagebox.showerror("Error", "File CSV 'daftar_hotel_solo.csv' tidak ditemukan.")
         return None
     
-def hotel_selection_page(main):
+def hotel_selection_page(main,priceSingle, priceDouble, room_type, payment_method):
     from akhir import clear_frame
     clear_frame(main)
 
@@ -78,7 +78,7 @@ def hotel_selection_page(main):
             hotel_list_frame,
             text=hotel_info,
             font=("Arial", 12),
-            command=lambda i=index: book_hotel(hotels, i, main),
+            command=lambda i=index: book_hotel(hotels, i, main,priceSingle, priceDouble, room_type, payment_method),
             bg="#f0f0f0",
             fg="#333333"
         )
@@ -131,132 +131,173 @@ def clear_session():
         os.remove(SESSION_FILE)
 
 
-def book_hotel(hotels, index, main):
+def book_hotel(hotels, index, main, priceSingle, priceDouble, room_type, payment_method):
     from akhir import clear_frame
+    from booking import show_booking_form
     clear_frame(main)
-    
+
+    # Load background image
+    canvas = tk.Canvas(main, width=1920, height=1080)
+    canvas.pack(fill=tk.BOTH, expand=True)
+
+    try:
+        bg_image = Image.open("py.png")  # Pastikan file "py.png" ada
+        bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)
+        bg_photo = ImageTk.PhotoImage(bg_image)
+        canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+        main.bg_photo = bg_photo
+    except FileNotFoundError:
+        messagebox.showerror("Error", "Background image 'py.png' not found.")
+        return
+
+    # Informasi hotel
     hotel_name = hotels.iloc[index]['Nama Hotel']
     address = hotels.iloc[index]['Alamat']
     rating = hotels.iloc[index]['Rating']
     phone = hotels.iloc[index]['Nomor Telepon']
-    priceSingle = hotels.iloc[index]['Single']
-    priceDouble = hotels.iloc[index]['Double']
 
+    # Frame utama untuk semua elemen
+    main_frame = tk.Frame(main, bg="white")
+    main_frame.place(relx=0.5, rely=0.45, anchor="center", relwidth=0.5, relheight=0.83)
+
+    # Informasi hotel di dalam frame utama
+    tk.Label(
+        main_frame,
+        text=f"Hotel: {hotel_name}",
+        font=("Arial", 24, "bold"),
+        bg="white",
+        fg="#333333"
+    ).pack(pady=10)
+
+    tk.Label(
+        main_frame,
+        text=f"Alamat: {address}",
+        font=("Arial", 16),
+        bg="white",
+        fg="#555555"
+    ).pack(pady=5)
+
+    tk.Label(
+        main_frame,
+        text=f"Rating: {rating}",
+        font=("Arial", 16),
+        bg="white",
+        fg="#555555"
+    ).pack(pady=5)
+
+    tk.Label(
+        main_frame,
+        text=f"Telepon: {phone}",
+        font=("Arial", 16),
+        bg="white",
+        fg="#555555"
+    ).pack(pady=5)
+
+    # Pemilihan tanggal booking
+    tk.Label(main_frame, text="Pilih Tanggal Booking:", font=("Arial", 16), bg="white").pack(pady=10)
     booking_date = tk.StringVar()
-    room_type = tk.StringVar()
-    payment_method = tk.StringVar()
-
-    tk.Label(main, text=f"Hotel: {hotel_name}", font=("Arial", 20)).pack(pady=10)
-    tk.Label(main, text=f"Alamat: {address}", font=("Arial", 14)).pack(pady=5)
-    tk.Label(main, text=f"Rating: {rating}", font=("Arial", 14)).pack(pady=5)
-    tk.Label(main, text=f"Telepon: {phone}", font=("Arial", 14)).pack(pady=5)
-
-    def select_date():
-        date_window = tk.Toplevel(main)
-        date_window.title("Pilih Tanggal")
-        calendar = Calendar(date_window, selectmode='day', date_pattern='yyyy-mm-dd', showweeknumbers=False)
-        calendar.pack(pady=20)
-
-        def confirm_date():
-            booking_date.set(calendar.get_date())
-            date_window.destroy()
-
-        confirm_button = tk.Button(date_window, text="Pilih", command=confirm_date)
-        confirm_button.pack(pady=10)
-
-    select_date_button = tk.Button(main, text="Pilih Tanggal Booking", command=select_date)
-    select_date_button.pack(pady=20)
-
-    tk.Label(main, text="Tipe Kamar:", font=("Arial", 14)).pack(pady=10)
-    room_type.set("Single")
-    tk.Radiobutton(main, text=f"Single (Rp {priceSingle})", variable=room_type, value="Single", font=("Arial", 12)).pack()
-    tk.Radiobutton(main, text=f"Double (Rp {priceDouble})", variable=room_type, value="Double", font=("Arial", 12)).pack()
-    
-    tk.Label(main, text="Pilih Metode Pembayaran:", font=("Arial", 14)).pack(pady=10)
-    payment_method.set("Transfer Bank")
-    tk.Radiobutton(main, text="Transfer Bank", variable=payment_method, value="Transfer Bank", font=("Arial", 12)).pack()
-    tk.Radiobutton(main, text="Kartu Kredit", variable=payment_method, value="Kartu Kredit", font=("Arial", 12)).pack()
-    tk.Radiobutton(main, text="Bayar di Tempat", variable=payment_method, value="Bayar di Tempat", font=("Arial", 12)).pack()
-
-    def on_book():
-        
-        selected_date = booking_date.get()
-        selected_payment = payment_method.get()
-        if not selected_date:
-            messagebox.showerror("Error", "Harap pilih tanggal booking!")
-            return
-        # Muat gambar JPG untuk background
-        try:
-            # Pastikan file "py.png" ada
-            bg_image_path = "py.png"  # Sesuaikan path jika gambar ada di folder lain
-            if not os.path.exists(bg_image_path):
-                raise FileNotFoundError(f"File '{bg_image_path}' tidak ditemukan.")
-
-            bg_image = Image.open(bg_image_path)
-            bg_image = bg_image.resize((1920, 1080), Image.Resampling.LANCZOS)  # Resize sesuai jendela
-            bg_photo = ImageTk.PhotoImage(bg_image)
-
-            # Simpan referensi ke gambar di objek `main`
-            main.bg_photo = bg_photo  # Simpan referensi agar gambar tidak hilang
-            canvas.create_image(0, 0, image=main.bg_photo, anchor="nw")
-
-        except FileNotFoundError as e:
-            messagebox.showerror("Error", str(e))
-            return
-
-        # Validasi tanggal
-        try:
-            datetime.strptime(selected_date, '%Y-%m-%d')
-        except ValueError:
-            messagebox.showerror("Error", "Format tanggal salah!")
-            return
-        
-        # Logika tambahan untuk metode pembayaran
-        if selected_payment == "Transfer Bank":
-            messagebox.showinfo("Instruksi", "Silakan transfer ke rekening berikut:\n\nBank: BNI\nNo. Rekening: 1814241787\nAtas Nama: Hotel Booking")
-        elif selected_payment == "Kartu Kredit":
-            messagebox.showinfo("Instruksi", "Pembayaran melalui kartu kredit akan diproses secara otomatis.")
-        else:
-            messagebox.showinfo("Instruksi", "Silakan selesaikan pembayaran di lokasi.")
-
-        # Simpan data booking
-        save_booking(main.email, hotel_name, selected_date, room_type.get(),selected_payment)
-        
-        # Kirim email konfirmasi
-        price = priceSingle if room_type.get() == "Single" else priceDouble
-        email_sent = send_booking_confirmation(
-            main.email, hotel_name, selected_date, room_type.get(), price, selected_payment
+    calendar = Calendar(main_frame, selectmode='day', date_pattern='yyyy-mm-dd', showweeknumbers=False)
+    calendar.pack(pady=10)
+    # Tombol untuk konfirmasi dan kembali
+    tk.Button(
+        main_frame,
+        text="Pilih",
+        font=("Arial", 14),
+        bg="green",
+        fg="white",
+        # Callback untuk memanggil show_booking_form saat tombol diklik
+        command=lambda: show_booking_form(
+            main, booking_date, hotel_name, address, rating, phone, priceSingle, priceDouble
         )
+    ).pack(pady=10)
 
-        if email_sent:
-            messagebox.showinfo("Sukses", f"Pemesanan berhasil! Email konfirmasi dikirim ke {main.email}.")
-            thank_you_page(main)
-        else:
-            messagebox.showerror("Error", "Gagal mengirim email konfirmasi.")
-            hotel_selection_page(main)
+    tk.Button(
+        main_frame,
+        text="Kembali",
+        font=("Arial", 14),
+        bg="red",
+        fg="white",
+        # Callback untuk kembali ke halaman pemilihan hotel
+        command=lambda: hotel_selection_page(main,priceSingle=0, priceDouble=0, room_type=None,payment_method=None)
+    ).pack(pady=10)
 
-    book_button = tk.Button(main, text="Booking", font=("Arial", 14), bg="green", fg="white", command=on_book)
-    book_button.pack(pady=20)
+def confirm_date(main, calendar, booking_date, main_frame, hotel_name, address, rating, phone, priceSingle, priceDouble, room_type, payment_method):
+    from booking import show_booking_form
+    # Ambil tanggal dari kalender dan simpan ke booking_date
+    booking_date.set(calendar.get_date())
+    messagebox.showinfo("Konfirmasi", f"Tanggal yang dipilih: {booking_date.get()}")
 
-    back_button = tk.Button(main, text="Kembali", font=("Arial", 14), command=lambda: hotel_selection_page(main))
-    back_button.pack(pady=10)
+    # # Tombol untuk konfirmasi dan kembali
+    # tk.Button(
+    #     main_frame,
+    #     text="Pilih",
+    #     font=("Arial", 14),
+    #     bg="green",
+    #     fg="white",
+    #     # Callback untuk memanggil show_booking_form saat tombol diklik
+    #     command=lambda: show_booking_form(
+    #         main, booking_date, hotel_name, address, rating, phone, priceSingle, priceDouble, room_type, payment_method
+    #     )
+    # ).pack(pady=10)
+
+    # tk.Button(
+    #     main_frame,
+    #     text="Kembali",
+    #     font=("Arial", 14),
+    #     bg="red",
+    #     fg="white",
+    #     # Callback untuk kembali ke halaman pemilihan hotel
+    #     command=lambda: hotel_selection_page(main)
+    # ).pack(pady=10)
+
     
-    # Canvas untuk background
-    canvas = tk.Canvas(main, width=1000, height=600)
-    canvas.pack(fill=tk.BOTH, expand=True)
+# def show_booking_form(main, booking_date, hotel_name, address, rating, phone, priceSingle, priceDouble, room_type, payment_method):
+#     from akhir import clear_frame
+#     clear_frame(main)
 
+#     tk.Label(main, text=f"Hotel: {hotel_name}", font=("Arial", 20)).pack(pady=10)
+#     tk.Label(main, text=f"Alamat: {address}", font=("Arial", 14)).pack(pady=5)
+#     tk.Label(main, text=f"Rating: {rating}", font=("Arial", 14)).pack(pady=5)
+#     tk.Label(main, text=f"Telepon: {phone}", font=("Arial", 14)).pack(pady=5)
 
+#     tk.Label(main, text="Tipe Kamar:", font=("Arial", 14)).pack(pady=10)
+#     room_type.set("Single")
+#     tk.Radiobutton(main, text=f"Single (Rp {priceSingle})", variable=room_type, value="Single", font=("Arial", 12)).pack()
+#     tk.Radiobutton(main, text=f"Double (Rp {priceDouble})", variable=room_type, value="Double", font=("Arial", 12)).pack()
+    
+#     tk.Label(main, text="Pilih Metode Pembayaran:", font=("Arial", 14)).pack(pady=10)
+#     payment_method.set("Transfer Bank")
+#     tk.Radiobutton(main, text="Transfer Bank", variable=payment_method, value="Transfer Bank", font=("Arial", 12)).pack()
+#     tk.Radiobutton(main, text="Kartu Kredit", variable=payment_method, value="Kartu Kredit", font=("Arial", 12)).pack()
+#     tk.Radiobutton(main, text="Bayar di Tempat", variable=payment_method, value="Bayar di Tempat", font=("Arial", 12)).pack()
 
-def thank_you_page(main):
-    from akhir import clear_frame
-    from login import login_page
-    clear_frame(main)  # Bersihkan frame sebelumnya
+#     tk.Button(main, text="Booking", font=("Arial", 14), bg="green", fg="white", command=lambda: on_book(main, booking_date, room_type, payment_method, hotel_name, priceSingle, priceDouble)).pack(pady=20)
+#     tk.Button(main, text="Kembali", font=("Arial", 14), command=lambda: hotel_selection_page(main)).pack(pady=10)
 
-    # Buat label terima kasih
-    tk.Label(main, text="Terima Kasih!", font=("Arial", 24, "bold"), fg="green").pack(pady=20)
-    tk.Label(main, text="Pemesanan Anda telah berhasil.", font=("Arial", 16)).pack(pady=10)
-    tk.Label(main, text="Email konfirmasi telah dikirim.", font=("Arial", 14)).pack(pady=5)
-        
-    # Tombol untuk kembali ke halaman awal
-    tk.Button(main, text="Kembali ke Halaman Utama", font=("Arial", 14), command=lambda: login_page(main)).pack(pady=20)   
+# def on_book(main, booking_date, room_type, payment_method, hotel_name, priceSingle, priceDouble):
+#     from akhir import thank_you_page
+#     if not booking_date.get():
+#         messagebox.showerror("Error", "Harap pilih tanggal booking!")
+#         return
+
+#     try:
+#         datetime.strptime(booking_date.get(), '%Y-%m-%d')
+#     except ValueError:
+#         messagebox.showerror("Error", "Format tanggal salah!")
+#         return
+
+#     selected_payment = payment_method.get()
+#     price = priceSingle if room_type.get() == "Single" else priceDouble
+
+#     # Simpan booking
+#     save_booking(main.email, hotel_name, booking_date.get(), room_type.get(), selected_payment)
+
+#     # Kirim email konfirmasi
+#     email_sent = send_booking_confirmation(main.email, hotel_name, booking_date.get(), room_type.get(), price, selected_payment)
+#     if email_sent:
+#         messagebox.showinfo("Sukses", f"Pemesanan berhasil! Email konfirmasi dikirim ke {main.email}.")
+#         thank_you_page(main)
+#     else:
+#         messagebox.showerror("Error", "Gagal mengirim email konfirmasi.")
+#         hotel_selection_page(main)
 

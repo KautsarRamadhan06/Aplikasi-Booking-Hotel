@@ -5,29 +5,40 @@ import os
 from akhir import clear_frame,load_users,save_session
 from hotel import hotel_selection_page
 
-def login_with_session(main):
+def login_with_session(main, priceSingle, priceDouble, room_type, payment_method):
+    print(f"Price Single: {priceSingle}")
+    print(f"Price Double: {priceDouble}")
+    print(f"Room Type: {room_type}")
+    print(f"Payment Method: {payment_method}")
+    
     from akhir import load_session
     session_email = load_session()
     if session_email:
         users = load_users()
         user = users[users['Email'] == session_email]
         if not user.empty:
-            main.email = session_email
-            hotel_selection_page(main)
+            main.email = session_email  # Ganti main dengan window
+            hotel_selection_page(main, priceSingle, priceDouble, room_type, payment_method)  # Ganti main dengan window
             return
-    login_page(main)
-    
-def login_page(main):
-    # Bersihkan frame utama
-    clear_frame(main)
+    login_page(main)  # Ganti main dengan window
 
+
+import tkinter as tk
+from tkinter import messagebox
+import os
+from PIL import Image, ImageTk  # Make sure Pillow is installed (`pip install Pillow`)
+
+# Assuming load_users and save_session are defined elsewhere in your code
+# from your_users_module import load_users, save_session
+from hotel import hotel_selection_page
+
+def login_page(main):
     # Canvas untuk background
     canvas = tk.Canvas(main, width=1000, height=600)
     canvas.pack(fill=tk.BOTH, expand=True)
 
     # Muat gambar JPG untuk background
     try:
-        # Pastikan file "login awal.png" ada
         bg_image_path = "login1.png"  # Sesuaikan path jika gambar ada di folder lain
         if not os.path.exists(bg_image_path):
             raise FileNotFoundError(f"File '{bg_image_path}' tidak ditemukan.")
@@ -70,7 +81,7 @@ def login_page(main):
         if email == "" or password == "":
             messagebox.showerror("Error", "Harap masukkan email dan password")
         else:
-            users = load_users()
+            users = load_users()  # Assuming this function is implemented to load user data
             user = users[users['Email'] == email]
             if user.empty:
                 messagebox.showerror("Error", "Email belum terdaftar")
@@ -78,8 +89,8 @@ def login_page(main):
                 messagebox.showerror("Error", "Password salah")
             else:
                 main.email = email
-                save_session(email)
-                hotel_selection_page(main)
+                save_session(email)  # Assuming this function saves the session
+                hotel_selection_page(main,priceSingle=0, priceDouble=0, room_type=None,payment_method=None)  # Redirect to hotel selection page
 
     # Tombol Login
     login_button = tk.Button(login_frame, text="Login", font=("Arial", 14), command=on_login, bg="green", fg="white")
@@ -92,50 +103,47 @@ def login_page(main):
         font=("Arial", 12), 
         bg="green", 
         fg="white", 
-        command=lambda: login_page(main)
+        command=lambda: registration_page(main)  # Assuming registration_page is defined elsewhere
     )
     register_button.pack(pady=10)
+
     
-    
+def clear_frame(frame):
+    for widget in frame.winfo_children():
+        widget.destroy()
+
 def registration_page(main):
-    # Bersihkan frame utama
     clear_frame(main)
 
-    # Main registration frame
     reg_frame = tk.Frame(main)
     reg_frame.pack(pady=50)
 
-    # Email field with label
+    tk.Label(reg_frame, text="Registration Page", font=("Arial", 16)).pack(pady=10)
+
     email_frame = tk.Frame(reg_frame)
     email_frame.pack(pady=10, anchor="w")
-    tk.Label(
-        email_frame, text="Email:", font=("Arial", 14)
-    ).pack(anchor="w")
+    tk.Label(email_frame, text="Email:", font=("Arial", 14)).pack(anchor="w")
     email_entry = tk.Entry(email_frame, font=("Arial", 14))
     email_entry.pack(anchor="w")
 
-    # Password field with label
     password_frame = tk.Frame(reg_frame)
     password_frame.pack(pady=10, anchor="w")
     tk.Label(password_frame, text="Password:", font=("Arial", 14)).pack(anchor="w")
     password_entry = tk.Entry(password_frame, font=("Arial", 14), show="*")
     password_entry.pack(anchor="w")
 
-    # Confirm Password field with label
     confirm_password_frame = tk.Frame(reg_frame)
     confirm_password_frame.pack(pady=10, anchor="w")
     tk.Label(confirm_password_frame, text="Confirm Password:", font=("Arial", 14)).pack(anchor="w")
     confirm_password_entry = tk.Entry(confirm_password_frame, font=("Arial", 14), show="*")
     confirm_password_entry.pack(anchor="w")
 
-    # Phone Number field with label
     phone_frame = tk.Frame(reg_frame)
     phone_frame.pack(pady=10, anchor="w")
     tk.Label(phone_frame, text="Phone Number:", font=("Arial", 14)).pack(anchor="w")
     phone_entry = tk.Entry(phone_frame, font=("Arial", 14))
     phone_entry.pack(anchor="w")
 
-    # Birthday field with label
     birthday_frame = tk.Frame(reg_frame)
     birthday_frame.pack(pady=10, anchor="w")
     tk.Label(birthday_frame, text="Birthday (yyyy-mm-dd):", font=("Arial", 14)).pack(anchor="w")
@@ -154,13 +162,20 @@ def registration_page(main):
         elif password != confirm_password:
             messagebox.showerror("Error", "Password dan konfirmasi password tidak cocok")
         else:
-            users = load_users()
-            if email in users['Email'].values:
-                messagebox.showerror("Error", "Email sudah terdaftar")
-            else:
-                save_session(email, password, phone, birthday)
-                messagebox.showinfo("Success", "Registrasi berhasil, silakan login")
-                login_page(main)
+            messagebox.showinfo("Success", "Registrasi berhasil")
+            
+        clear_frame(main)
+        # Kembali ke halaman login
+        login_page(main)
+
 
     reg_button = tk.Button(reg_frame, text="Register", font=("Arial", 14), command=on_register)
     reg_button.pack(pady=20)
+    
+# root = tk.Tk()
+# root.geometry("400x500")
+# main = tk.Frame(root)
+# main.pack(fill="both", expand=True)
+
+# registration_page(main)
+# root.mainloop()
