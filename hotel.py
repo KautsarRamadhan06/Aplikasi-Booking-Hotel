@@ -22,7 +22,7 @@ def load_hotels():
     except FileNotFoundError:
         messagebox.showerror("Error", "File CSV 'daftar_hotel_solo.csv' tidak ditemukan.")
         return None
-
+    
 def hotel_selection_page(main,priceSingle, priceDouble, room_type, payment_method):
     from akhir import clear_frame
     clear_frame(main)
@@ -57,8 +57,8 @@ def hotel_selection_page(main,priceSingle, priceDouble, room_type, payment_metho
     # Konfigurasi canvas
     canvas.configure(yscrollcommand=scrollbar.set)
     canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-
-
+    
+    
 
     # Frame di dalam canvas untuk konten hotel
     hotel_list_frame = tk.Frame(canvas, bg="white")
@@ -66,12 +66,12 @@ def hotel_selection_page(main,priceSingle, priceDouble, room_type, payment_metho
 
     # Header
     tk.Label(hotel_list_frame, text="Pilih Hotel", font=("Arial", 20, "bold"), bg="white").pack(pady=10)
-
+    
     hotels = load_hotels()
     if hotels is None or hotels.empty:
         messagebox.showerror("Error", "Tidak ada hotel yang tersedia.")
         return
-
+    
     for index, row in hotels.iterrows():
         hotel_info = f"{row['Nama Hotel']} - Rating: {row['Rating']} - {row['Alamat']}"
         hotel_button = tk.Button(
@@ -83,12 +83,12 @@ def hotel_selection_page(main,priceSingle, priceDouble, room_type, payment_metho
             fg="#333333"
         )
         hotel_button.pack(pady=5)
-
+        
 # Tambahkan tombol Logout di bagian bawah
     logout_button = tk.Button(main,text="Logout",font=("Arial", 14),bg="red",fg="white",command=lambda: logout(main))
     logout_button.place(x=1000, y=750, width=100, height=40)
-
-
+    
+    
 from tkinter import messagebox
 import pandas as pd
 
@@ -97,7 +97,7 @@ def logout(main):
     from login import login_page
     if messagebox.askyesno("Logout", "Apakah Anda yakin ingin logout?"):
         main.email = None
-        clear_session()
+        clear_session()  
         login_page(main)# Fungsi untuk membersihkan sesi pengguna
         # Navigasi ke halaman login
 
@@ -107,7 +107,7 @@ def display_hotel_list(main, hotel_list_frame):
     if hotels is None or hotels.empty:
         messagebox.showerror("Error", "Tidak ada hotel yang tersedia.")
         return
-
+    
     # Hapus elemen yang ada di frame (jika perlu refresh)
     for widget in hotel_list_frame.winfo_children():
         widget.destroy()
@@ -124,7 +124,7 @@ def display_hotel_list(main, hotel_list_frame):
             fg="#333333"
         )
         hotel_button.pack(pady=5)
-
+    
 # Fungsi untuk menghapus sesi pengguna
 def clear_session():
     if os.path.exists(SESSION_FILE):
@@ -160,7 +160,7 @@ def book_hotel(hotels, index, main, priceSingle, priceDouble, room_type, payment
 
     # Frame utama untuk semua elemen
     main_frame = tk.Frame(main, bg="white")
-    main_frame.place(relx=0.5, rely=0.45, anchor="center", relwidth=0.5, relheight=0.83)
+    main_frame.place(relx=0.5, rely=0.45, anchor="center", relwidth=0.5, relheight=0.7)
 
     # Informasi hotel di dalam frame utama
     tk.Label(
@@ -200,7 +200,6 @@ def book_hotel(hotels, index, main, priceSingle, priceDouble, room_type, payment
     booking_date = tk.StringVar()
     calendar = Calendar(main_frame, selectmode='day', date_pattern='yyyy-mm-dd', showweeknumbers=False)
     calendar.pack(pady=10)
-    booking_date.set(calendar.get_date())
     # Tombol untuk konfirmasi dan kembali
     tk.Button(
         main_frame,
@@ -214,7 +213,6 @@ def book_hotel(hotels, index, main, priceSingle, priceDouble, room_type, payment
         )
     ).pack(pady=10)
 
-
     tk.Button(
         main_frame,
         text="Kembali",
@@ -222,10 +220,10 @@ def book_hotel(hotels, index, main, priceSingle, priceDouble, room_type, payment
         bg="red",
         fg="white",
         # Callback untuk kembali ke halaman pemilihan hotel
-        command=lambda: hotel_selection_page(main,priceSingle=0, priceDouble=0, room_type=None,payment_method=None)
+        command=lambda: hotel_selection_page(main,priceSingle, priceDouble, room_type,payment_method)
     ).pack(pady=10)
 
-def confirm_date(main, calendar, booking_date, main_frame, hotel_name, address, rating, phone, priceSingle, priceDouble, room_type, payment_method):
+def confirm_date(calendar, booking_date):
     from booking import show_booking_form
     # Ambil tanggal dari kalender dan simpan ke booking_date
     booking_date.set(calendar.get_date())
@@ -254,7 +252,7 @@ def confirm_date(main, calendar, booking_date, main_frame, hotel_name, address, 
     #     command=lambda: hotel_selection_page(main)
     # ).pack(pady=10)
 
-
+    
 # def show_booking_form(main, booking_date, hotel_name, address, rating, phone, priceSingle, priceDouble, room_type, payment_method):
 #     from akhir import clear_frame
 #     clear_frame(main)
@@ -268,7 +266,7 @@ def confirm_date(main, calendar, booking_date, main_frame, hotel_name, address, 
 #     room_type.set("Single")
 #     tk.Radiobutton(main, text=f"Single (Rp {priceSingle})", variable=room_type, value="Single", font=("Arial", 12)).pack()
 #     tk.Radiobutton(main, text=f"Double (Rp {priceDouble})", variable=room_type, value="Double", font=("Arial", 12)).pack()
-
+    
 #     tk.Label(main, text="Pilih Metode Pembayaran:", font=("Arial", 14)).pack(pady=10)
 #     payment_method.set("Transfer Bank")
 #     tk.Radiobutton(main, text="Transfer Bank", variable=payment_method, value="Transfer Bank", font=("Arial", 12)).pack()
@@ -304,3 +302,4 @@ def confirm_date(main, calendar, booking_date, main_frame, hotel_name, address, 
 #     else:
 #         messagebox.showerror("Error", "Gagal mengirim email konfirmasi.")
 #         hotel_selection_page(main)
+
