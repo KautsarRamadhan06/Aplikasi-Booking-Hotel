@@ -182,10 +182,4 @@ def registration_page(main):
     reg_button = tk.Button(reg_frame, text="Register", font=("Arial", 14), command=on_register)
     reg_button.pack(pady=20)
     
-# root = tk.Tk()
-# root.geometry("400x500")
-# main = tk.Frame(root)
-# main.pack(fill="both", expand=True)
 
-# registration_page(main)
-# root.mainloop()
