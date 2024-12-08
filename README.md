@@ -15,12 +15,12 @@ I0324043 EMANUELA CHERRY / https://github.com/EmanuelaCherry
 
 APLIKASI BOOKING HOTEL YANG KAMI NAMAKAN QANTUX's
 
-
-DESKRIPSI =
+DESKRIPSI:
 
 Aplikasi ini memudahkan customer untuk booking hotel di area solo, kami mengumpulkan data hotel yaitu nama, rating, no telepon, dan harga. Dengan register kemudian sign in setelah itu menentukan tanggal, pilihan jenis kamar, dan memilih jalur pembayaran, customer sudah dapat memesan hotel yang kemudian bukti bookingnya dikirim ke email.
 
-LIBRARY YANG PERLU DIINSTAL TERLEBIH DAHULU
+
+LIBRARY YANG PERLU DIINSTAL TERLEBIH DAHULU:
 1. Pandas
 2. Pillow
 3. Tkcalendar
@@ -37,6 +37,7 @@ FITUR APLIKASI:
    FLOWCHART
 
 ![flowchart finish drawio](https://github.com/user-attachments/assets/8c28e8ce-495a-496f-a1d3-11aab1d0272b)
+
 
 SITEMAP
 
