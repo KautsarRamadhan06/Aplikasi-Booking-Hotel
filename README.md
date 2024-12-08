@@ -31,3 +31,7 @@ FITUR APLIKASI:
 ![flowchart finish drawio](https://github.com/user-attachments/assets/8c28e8ce-495a-496f-a1d3-11aab1d0272b)
 
 SITEMAP
+
+![Sitemap](https://github.com/user-attachments/assets/5008bc19-15e1-4b5a-abfa-a1df5931d706)
+
+
