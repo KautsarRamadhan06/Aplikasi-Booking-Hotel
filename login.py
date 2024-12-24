@@ -1,39 +1,28 @@
 import tkinter as tk
-from tkinter import messagebox
-from PIL import Image, ImageTk
+from tkinter import ttk, messagebox
+from hotel import hotel_selection_page
 import os
 import csv
-from akhir import clear_frame,load_users,save_session
-from hotel import hotel_selection_page
+import re
+from PIL import Image, ImageTk  # Untuk background image
 
-def login_with_session(main, priceSingle, priceDouble, room_type, payment_method):
-    print(f"Price Single: {priceSingle}")
-    print(f"Price Double: {priceDouble}")
-    print(f"Room Type: {room_type}")
-    print(f"Payment Method: {payment_method}")
-    
-    from akhir import load_session
-    session_email = load_session()
-    if session_email:
-        users = load_users()
-        user = users[users['Email'] == session_email]
-        if not user.empty:
-            main.email = session_email  # Ganti main dengan window
-            hotel_selection_page(main, priceSingle, priceDouble, room_type, payment_method)  # Ganti main dengan window
-            return
-    login_page(main)  # Ganti main dengan window
+def clear_frame(frame):
+    for widget in frame.winfo_children():
+        widget.destroy()
 
+def load_users():
+    import pandas as pd
+    if not os.path.exists('users.csv'):
+        return pd.DataFrame(columns=['Email', 'Password', 'Phone', 'Birthday'])
+    return pd.read_csv('users.csv')
 
-import tkinter as tk
-from tkinter import messagebox
-import os
-from PIL import Image, ImageTk  # Make sure Pillow is installed (`pip install Pillow`)
-
-# Assuming load_users and save_session are defined elsewhere in your code
-# from your_users_module import load_users, save_session
-from hotel import hotel_selection_page
+def save_session(email):
+    with open('session.txt', 'w') as file:
+        file.write(email)
 
 def login_page(main):
+    clear_frame(main)  # Pastikan frame utama dibersihkan terlebih dahulu
+
     # Canvas untuk background
     canvas = tk.Canvas(main, width=1000, height=600)
     canvas.pack(fill=tk.BOTH, expand=True)
@@ -58,21 +47,17 @@ def login_page(main):
 
     # Frame untuk elemen login
     login_frame = tk.Frame(main, bg="white", bd=5)
-    login_frame.place(relx=0.7, rely=0.3, relwidth=0.15, relheight=0.3)  # Posisikan di tengah
+    login_frame.place(relx=0.7, rely=0.3, relwidth=0.2, relheight=0.4)  # Posisikan frame login
 
     # Email field with label
-    email_frame = tk.Frame(login_frame, bg="white", width=300, height=100)
-    email_frame.pack(pady=10, anchor="s")
-    tk.Label(email_frame, text="Email:", font=("Arial", 14), bg="white").pack(anchor="w")
-    email_entry = tk.Entry(email_frame, font=("Arial", 14))
-    email_entry.pack(anchor="w")
+    tk.Label(login_frame, text="Email:", font=("Arial", 14), bg="white").pack(anchor="w", padx=10, pady=5)
+    email_entry = tk.Entry(login_frame, font=("Arial", 14))
+    email_entry.pack(fill="x", padx=10)
 
     # Password field with label
-    password_frame = tk.Frame(login_frame, bg="white")
-    password_frame.pack(pady=10, anchor="s")
-    tk.Label(password_frame, text="Password:", font=("Arial", 14), bg="white").pack(anchor="w")
-    password_entry = tk.Entry(password_frame, font=("Arial", 14), show="*")
-    password_entry.pack(anchor="w")
+    tk.Label(login_frame, text="Password:", font=("Arial", 14), bg="white").pack(anchor="w", padx=10, pady=5)
+    password_entry = tk.Entry(login_frame, font=("Arial", 14), show="*")
+    password_entry.pack(fill="x", padx=10)
 
     # Fungsi login
     def on_login():
@@ -82,20 +67,21 @@ def login_page(main):
         if email == "" or password == "":
             messagebox.showerror("Error", "Harap masukkan email dan password")
         else:
-            users = load_users()  # Assuming this function is implemented to load user data
-            user = users[users['Email'] == email]
-            if user.empty:
-                messagebox.showerror("Error", "Email belum terdaftar")
-            elif user.iloc[0]['Password'] != password:
-                messagebox.showerror("Error", "Password salah")
-            else:
-                main.email = email
-                save_session(email)  # Assuming this function saves the session
-                hotel_selection_page(main,priceSingle=0, priceDouble=0, room_type=None,payment_method=None)  # Redirect to hotel selection page
+             users = load_users()  # Assuming this function is implemented to load user data
+        user = users[users['Email'] == email]
+        if user.empty:
+            messagebox.showerror("Error", "Email belum terdaftar")
+        elif user.iloc[0]['Password'] != password:
+            messagebox.showerror("Error", "Password salah")
+        else:
+            main.email = email  # Simpan email pengguna
+            save_session(email)  # Simpan sesi login pengguna
+            clear_frame(main)  # Bersihkan frame utama
+            hotel_selection_page(main, priceSingle=0, priceDouble=0, room_type=None, payment_method=None)
 
     # Tombol Login
     login_button = tk.Button(login_frame, text="Login", font=("Arial", 14), command=on_login, bg="green", fg="white")
-    login_button.pack(pady=20)
+    login_button.pack(pady=10)
 
     # Tombol Registrasi
     register_button = tk.Button(
@@ -104,53 +90,54 @@ def login_page(main):
         font=("Arial", 12), 
         bg="green", 
         fg="white", 
-        command=lambda: registration_page(main)  # Assuming registration_page is defined elsewhere
+        command=lambda: registration_page(main)
     )
-    register_button.pack(pady=10)
-
-    
-def clear_frame(frame):
-    for widget in frame.winfo_children():
-        widget.destroy()
+    register_button.pack(pady=5)
 
 def registration_page(main):
     clear_frame(main)
 
-    reg_frame = tk.Frame(main)
+    # Buat frame utama untuk registrasi
+    reg_frame = ttk.Frame(main, padding="20")
     reg_frame.pack(pady=50)
 
-    tk.Label(reg_frame, text="Registration Page", font=("Arial", 16)).pack(pady=10)
+    # Judul
+    ttk.Label(reg_frame, text="Registration Page", font=("Arial", 16)).grid(row=0, column=0, columnspan=2, pady=10)
 
-    email_frame = tk.Frame(reg_frame)
-    email_frame.pack(pady=10, anchor="w")
-    tk.Label(email_frame, text="Email:", font=("Arial", 14)).pack(anchor="w")
-    email_entry = tk.Entry(email_frame, font=("Arial", 14))
-    email_entry.pack(anchor="w")
+    # Kolom Email
+    ttk.Label(reg_frame, text="Email:", font=("Arial", 14)).grid(row=1, column=0, sticky="w", pady=5)
+    email_entry = ttk.Entry(reg_frame, font=("Arial", 14), width=30)
+    email_entry.grid(row=1, column=1, pady=5)
 
-    password_frame = tk.Frame(reg_frame)
-    password_frame.pack(pady=10, anchor="w")
-    tk.Label(password_frame, text="Password:", font=("Arial", 14)).pack(anchor="w")
-    password_entry = tk.Entry(password_frame, font=("Arial", 14), show="*")
-    password_entry.pack(anchor="w")
+    # Kolom Password
+    ttk.Label(reg_frame, text="Password:", font=("Arial", 14)).grid(row=2, column=0, sticky="w", pady=5)
+    password_entry = ttk.Entry(reg_frame, font=("Arial", 14), width=30, show="*")
+    password_entry.grid(row=2, column=1, pady=5)
 
-    confirm_password_frame = tk.Frame(reg_frame)
-    confirm_password_frame.pack(pady=10, anchor="w")
-    tk.Label(confirm_password_frame, text="Confirm Password:", font=("Arial", 14)).pack(anchor="w")
-    confirm_password_entry = tk.Entry(confirm_password_frame, font=("Arial", 14), show="*")
-    confirm_password_entry.pack(anchor="w")
+    # Kolom Konfirmasi Password
+    ttk.Label(reg_frame, text="Confirm Password:", font=("Arial", 14)).grid(row=3, column=0, sticky="w", pady=5)
+    confirm_password_entry = ttk.Entry(reg_frame, font=("Arial", 14), width=30, show="*")
+    confirm_password_entry.grid(row=3, column=1, pady=5)
 
-    phone_frame = tk.Frame(reg_frame)
-    phone_frame.pack(pady=10, anchor="w")
-    tk.Label(phone_frame, text="Phone Number:", font=("Arial", 14)).pack(anchor="w")
-    phone_entry = tk.Entry(phone_frame, font=("Arial", 14))
-    phone_entry.pack(anchor="w")
+    # Kolom Nomor Telepon
+    ttk.Label(reg_frame, text="Phone Number:", font=("Arial", 14)).grid(row=4, column=0, sticky="w", pady=5)
+    phone_entry = ttk.Entry(reg_frame, font=("Arial", 14), width=30)
+    phone_entry.grid(row=4, column=1, pady=5)
 
-    birthday_frame = tk.Frame(reg_frame)
-    birthday_frame.pack(pady=10, anchor="w")
-    tk.Label(birthday_frame, text="Birthday (yyyy-mm-dd):", font=("Arial", 14)).pack(anchor="w")
-    birthday_entry = tk.Entry(birthday_frame, font=("Arial", 14))
-    birthday_entry.pack(anchor="w")
+    # Kolom Tanggal Lahir
+    ttk.Label(reg_frame, text="Birthday (yyyy-mm-dd):", font=("Arial", 14)).grid(row=5, column=0, sticky="w", pady=5)
+    birthday_entry = ttk.Entry(reg_frame, font=("Arial", 14), width=30)
+    birthday_entry.grid(row=5, column=1, pady=5)
 
+    # Fungsi validasi tanggal lahir
+    def validate_birthday():
+        birthday = birthday_entry.get()
+        if re.match(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$", birthday):
+            messagebox.showinfo("Valid", "Tanggal lahir valid!")
+        else:
+            messagebox.showerror("Invalid", "Format tanggal lahir harus yyyy-mm-dd.")
+
+    # Fungsi untuk registrasi
     def on_register():
         email = email_entry.get()
         password = password_entry.get()
@@ -162,24 +149,28 @@ def registration_page(main):
             messagebox.showerror("Error", "Harap lengkapi semua kolom")
         elif password != confirm_password:
             messagebox.showerror("Error", "Password dan konfirmasi password tidak cocok")
+        elif not re.match(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$", birthday):
+            messagebox.showerror("Error", "Format tanggal lahir harus yyyy-mm-dd.")
         else:
-            # Simpan ke file CSV
             file_exists = os.path.isfile('users.csv')
             with open('users.csv', mode='a', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
-            # Tulis header jika file baru
                 if not file_exists:
                     writer.writerow(['Email', 'Password', 'Phone', 'Birthday'])
                 writer.writerow([email, password, phone, birthday])
-            
+
             messagebox.showinfo("Success", "Registrasi berhasil")
-            
-        clear_frame(main)
-        # Kembali ke halaman login
-        login_page(main)
+            login_page(main)  # Panggil kembali halaman login
 
+    # Tombol validasi tanggal lahir
+    ttk.Button(reg_frame, text="Validate Birthday", command=validate_birthday).grid(row=6, column=0, pady=10, sticky="w")
 
-    reg_button = tk.Button(reg_frame, text="Register", font=("Arial", 14), command=on_register)
-    reg_button.pack(pady=20)
-    
+    # Tombol registrasi
+    ttk.Button(reg_frame, text="Register", command=on_register).grid(row=6, column=1, pady=10, sticky="e")
 
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Hotel Booking System")
+    root.geometry("1000x600")
+    login_page(root)
+    root.mainloop()

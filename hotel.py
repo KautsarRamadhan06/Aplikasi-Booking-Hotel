@@ -24,6 +24,15 @@ def load_hotels():
         return None
     
 def hotel_selection_page(main,priceSingle, priceDouble, room_type, payment_method):
+   
+    # Implementasi halaman pemilihan hotel
+    frame = tk.Frame(main)
+    frame.pack(fill="both", expand=True)
+    tk.Label(frame, text="Welcome to the Hotel Booking Page!", font=("Arial", 20)).pack(pady=20)
+
+    # Contoh tombol untuk logika lebih lanjut
+    tk.Button(frame, text="Choose Room", command=lambda: print("Room Selection")).pack(pady=10)
+
     from akhir import clear_frame
     clear_frame(main)
 

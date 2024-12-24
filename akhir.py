@@ -210,7 +210,7 @@ def thank_you_page(main):
     # Add a "Back to Home" button
     home_button = tk.Button(
         main,
-        text="Kembali ke Beranda",
+        text="Logout",
         font=("Arial", 16),
         bg="#4CAF50",
         fg="white",
