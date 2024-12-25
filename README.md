@@ -20,11 +20,16 @@ DESKRIPSI:
 Aplikasi ini memudahkan customer untuk booking hotel di area solo, kami mengumpulkan data hotel yaitu nama, rating, no telepon, dan harga. Dengan register kemudian sign in setelah itu menentukan tanggal, pilihan jenis kamar, dan memilih jalur pembayaran, customer sudah dapat memesan hotel yang kemudian bukti bookingnya dikirim ke email.
 
 
-LIBRARY YANG PERLU DIINSTAL TERLEBIH DAHULU:
+LIBRARY YANG DIGUNAKAN:
 1. Pandas
 2. Pillow
 3. Tkcalendar
-
+4. smtplib
+5. os
+6. datetime
+7. email.mime.multipart 
+8. email.mime.text
+9.  tkinter
 
 FITUR APLIKASI:
 1. FITUR REGISTER DAN LOGIN
